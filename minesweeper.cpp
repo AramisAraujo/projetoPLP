@@ -4,8 +4,12 @@ using namespace std;
 
 const int boardSize = 8;//Game Board size minimum 9 (9x9 game board)
 const int bombs = int(((boardSize+ 1)*(boardSize+ 1))/10);//Bombs must be present in 10% of the game tiles
+char* coveredTile = "■";
+char* emptyTile = "□";
+char* flaggedTile = "◈";
 
 int gameBoard[boardSize][boardSize];
+char* display[boardSize][boardSize];
 
 int main(){
 
@@ -49,12 +53,24 @@ int main(){
         }
     }
 
+    cout << "Gameboard completed" << endl;
+
+    for(int h = 0; h <= boardSize; h++){
+        for(int j = 0; j <= boardSize; j++){
+            display[h][j] = coveredTile;        
+        }
+    }
+
+    cout << "Display Ready" << endl;
+
     for(int a = 0; a <= boardSize; a++){
         for(int b = 0; b <= boardSize; b++){
-            cout << gameBoard[a][b] << " ";
+            cout << display[a][b] << " ";
         }
         cout << endl;
     }
+
+    cout << "Done!" << endl;
 
     return(0);
 }
