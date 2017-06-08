@@ -22,35 +22,51 @@ int main(){
         int x = rand() % 8;
         int y = rand() % 8;
 
-        if(gameBoard[x][y] == 0){
-            gameBoard[x][y] = -1;//Places a bomb on the game board
-            bombCoord[placedBombs][0] = x;//We then save the coordinates for that bomb
-            bombCoord[placedBombs][1] = y;
+        if(gameBoard[y][x] == 0){
+            gameBoard[y][x] = -1;//Places a bomb on the game board
+            bombCoord[placedBombs][0] = y;//We then save the coordinates for that bomb
+            bombCoord[placedBombs][1] = x;
             placedBombs++;
-            cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
+            cout <<"Placed a bomb on y: " << y << " x: " << x << endl;//Spoilers
         }
 
     }
 
     for(int c = 0; c <= bombs; c++){
 
-        int xCoord = bombCoord[c][0];
-        int yCoord = bombCoord[c][1];
+        int yCoord = bombCoord[c][0];
+        int xCoord = bombCoord[c][1];
 
-        if(yCoord > 0 && gameBoard[xCoord][yCoord - 1] > -1){//add above bomb
-            gameBoard[xCoord - 1][yCoord]++;//Adding to the tile adjacent to a bomb
+        if(yCoord > 0 && gameBoard[yCoord - 1][xCoord] > -1){//add above bomb
+            gameBoard[yCoord - 1][xCoord]++;//Adding to the tile adjacent to a bomb
+        }
+
+        if(yCoord > 0 && xCoord - 1 >= 0 && gameBoard[yCoord - 1][xCoord - 1] > -1){//add upper left corner
+            gameBoard[yCoord - 1][xCoord - 1]++;//Adding to the tile adjacent to a bomb
+        }
+        
+        if(yCoord > 0 && xCoord + 1 < boardSize && gameBoard[yCoord - 1][xCoord + 1] > -1){//add upper right corner
+            gameBoard[yCoord - 1][xCoord + 1]++;//Adding to the tile adjacent to a bomb
         }  
 
-        if(yCoord < boardSize && gameBoard[xCoord][yCoord + 1] > -1){//add below bomb
-            gameBoard[xCoord + 1][yCoord]++;//Adding to the tile adjacent to a bomb
+        if(yCoord < boardSize && gameBoard[yCoord + 1][xCoord] > -1){//add below bomb
+            gameBoard[yCoord + 1][xCoord]++;//Adding to the tile adjacent to a bomb
 
         }
-        if(xCoord > 0 && gameBoard[xCoord - 1][yCoord] > -1){//add to the left of the bomb
-            gameBoard[xCoord][yCoord - 1]++;//Adding to the tile adjacent to a bomb
+        if(yCoord < boardSize && xCoord - 1 >= 0 && gameBoard[yCoord + 1][xCoord - 1] > -1){//add lower left corner
+            gameBoard[yCoord + 1][xCoord - 1]++;//Adding to the tile adjacent to a bomb
+        }
+        
+        if(yCoord < boardSize && xCoord + 1 < boardSize && gameBoard[yCoord + 1][xCoord + 1] > -1){//add lover right corner
+            gameBoard[yCoord + 1][xCoord + 1]++;//Adding to the tile adjacent to a bomb
+        }  
+
+        if(xCoord > 0 && gameBoard[yCoord][xCoord - 1] > -1){//add to the left of the bomb
+            gameBoard[yCoord][xCoord - 1]++;//Adding to the tile adjacent to a bomb
         }
 
-        if(xCoord < boardSize && gameBoard[xCoord + 1][yCoord] > -1){//add to the right of the bomb
-            gameBoard[xCoord][yCoord + 1]++;//Adding to the tile adjacent to a bomb
+        if(xCoord < boardSize && gameBoard[yCoord][xCoord + 1] > -1){//add to the right of the bomb
+            gameBoard[yCoord][xCoord + 1]++;//Adding to the tile adjacent to a bomb
         }
     }
 
