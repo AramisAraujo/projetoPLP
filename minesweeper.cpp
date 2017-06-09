@@ -15,6 +15,8 @@ int gameBoard[boardSize][boardSize];
 char* display[boardSize][boardSize];
 
 int showOptions(){
+    int option;
+  
     cout << "                   #Minesweeper#" << endl;
     cout << endl;
     cout << endl;
@@ -24,7 +26,27 @@ int showOptions(){
     cout << " 3. End game" << endl;
     cout << endl;
     cout << endl;
-  return 0; 
+    cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
+    cout << endl;
+      //Prints the display board
+    for(int a = 0; a <= boardSize; a++){
+        for(int b = 0; b <= boardSize; b++){
+          if (b == 0) {
+            cout << "               "<< a <<"   " << display[a][b] << "   ";
+          }else {
+            cout << display[a][b] << "   ";
+          }
+        }
+        cout << endl;
+        cout << endl;
+    }
+    //Asks user for interaction
+    cout << endl;
+    cout << "Type your option: ";
+    cin >> option;
+    //Don't forget to catch empty spaces/line terminators
+    cout << endl;
+  return option; 
 }
 
 int checkCoordinates(int x, int y){
@@ -115,29 +137,9 @@ int main(){
 
     while (gameEnded != 0){
       
-      showOptions();
-
       int option = 0;
-      cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
-      cout << endl;
-        //Prints the display board
-      for(int a = 0; a <= boardSize; a++){
-          for(int b = 0; b <= boardSize; b++){
-            if (b == 0) {
-              cout << "               "<< a <<"   " << display[a][b] << "   ";
-            }else {
-              cout << display[a][b] << "   ";
-            }
-          }
-          cout << endl;
-          cout << endl;
-      }
-      //Asks user for interaction
-      cout << endl;
-      cout << "Type your option: ";
-      cin >> option;
-      //Don't forget to catch empty spaces/line terminators
-      cout << endl;
+      
+      option = showOptions();
       
       switch (option) {
 
@@ -201,5 +203,3 @@ int main(){
 
     return(0);
 }
-
-
