@@ -27,6 +27,20 @@ int showOptions(){
   return 0; 
 }
 
+int checkCoordinates(int x, int y){
+  if(x < 0 || x > boardSize){
+      cout << "Invalid X coordinate, please try again." << endl;
+      cout << endl;
+  }
+  else if(y < 0 || y > boardSize){
+      cout << "Invalid Y coordinate, please try again." << endl;
+      cout << endl;
+  }
+  else{
+      return 1;
+  }
+  return 0;
+}
 
 int main(){
 
@@ -129,7 +143,7 @@ int main(){
 
         case 1:{//Ask user for coordinates in the board
 
-            int coordinatesAreValid = 1;
+            int coordinatesAreValid = 0;
             int xCoord;
             int yCoord;
 
@@ -141,16 +155,10 @@ int main(){
 
                 cin >> xCoord;//This is the horizontal coordinate
                 cin >> yCoord;//This is the vertical coordinate
+                
+                coordinatesAreValid = checkCoordinates(xCoord, yCoord);
 
-                if(xCoord < 0 || xCoord > boardSize){
-                    cout << "Invalid X coordinate, please try again." << endl;
-                }
-                else if(yCoord < 0 || yCoord > boardSize){
-                    cout << "Invalid Y coordinate, please try again." << endl;
-                }
-                else{
-                    coordinatesAreValid = 0;
-                }
+                
             }
 
             //TODO: if coordinates match with a bomb end game, else open tile or empty spaces
@@ -160,7 +168,7 @@ int main(){
 
         case 2:{//Ask user for coordinates in the board
 
-            int coordinatesAreValid = 1;
+            int coordinatesAreValid = 0;
             int xCoord;
             int yCoord;
 
@@ -173,18 +181,7 @@ int main(){
                 cin >> xCoord;//This is the horizontal coordinate
                 cin >> yCoord;//This is the vertical coordinate
 
-                if(xCoord < 0 || xCoord > boardSize){
-                    cout << "Invalid X coordinate, please try again." << endl;
-                }
-                else if(yCoord < 0 || yCoord > boardSize){
-                    cout << "Invalid Y coordinate, please try again." << endl;
-                }
-                else if(display[yCoord][xCoord] != coveredTile){
-                    cout<< "These coordinates do not represent a closed tile, please try again" << endl;
-                }
-                else{
-                    coordinatesAreValid = 0;
-                }
+                coordinatesAreValid = checkCoordinates(xCoord, yCoord);
             }
 
             display[yCoord][xCoord] = flaggedTile;
@@ -204,6 +201,5 @@ int main(){
 
     return(0);
 }
-
 
 
