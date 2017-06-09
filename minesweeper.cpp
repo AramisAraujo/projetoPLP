@@ -5,6 +5,8 @@ using namespace std;
 
 const int boardSize = 8;//Game Board size minimum 9 (9x9 game board)
 const int bombs = int(((boardSize+ 1)*(boardSize+ 1))/10);//Bombs must be present in 10% of the game tiles
+
+//Game Tiles
 char* coveredTile = "■";
 char* emptyTile = "□";
 char* flaggedTile = "◈";
@@ -27,12 +29,13 @@ int main(){
             bombCoord[placedBombs][0] = y;//We then save the coordinates for that bomb
             bombCoord[placedBombs][1] = x;
             placedBombs++;
-            cout <<"Placed a bomb on y: " << y << " x: " << x << endl;//Spoilers
+            //cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
+
         }
 
     }
 
-    for(int c = 0; c <= bombs; c++){
+    for(int c = 0; c < bombs; c++){
 
         int yCoord = bombCoord[c][0];
         int xCoord = bombCoord[c][1];
@@ -70,25 +73,126 @@ int main(){
         }
     }
 
-    cout << "Gameboard completed" << endl;
+    //cout << "Gameboard completed" << endl;
 
-    for(int h = 0; h <= boardSize; h++){
+    for(int h = 0; h <= boardSize; h++){//The display starts out as covered tiles
         for(int j = 0; j <= boardSize; j++){
             display[h][j] = coveredTile;        
         }
     }
 
-    cout << "Display Ready" << endl;
+    //cout << "Display Ready" << endl;
+    
+    cout << "                   #Minesweeper#" << endl;
+    cout << endl;
+    cout << endl;
+    cout << " Options" << endl;
+    cout << " 1. To open a tile" << endl;
+    cout << " 2. To flag a tile" << endl;
+    cout << " 3. End game" << endl;
+    cout << endl;
+    cout << endl;
 
-    for(int a = 0; a <= boardSize; a++){
-        for(int b = 0; b <= boardSize; b++){
-            cout << display[a][b] << " ";
+    int gameEnded = 1;
+
+    while (gameEnded != 0){
+
+        int option = 0;
+
+        //Prints the display board
+      for(int a = 0; a <= boardSize; a++){
+          for(int b = 0; b <= boardSize; b++){
+            if (b == 0) {
+              cout << "                 " << display[a][b] << " ";
+            }else {
+              cout << display[a][b] << " ";
+            }
+          }
+          cout << endl;
+      }
+      //Asks user for interaction
+      cout << endl;
+      cout << "Type your option: ";
+      cin >> option;
+      //Don't forget to catch empty spaces/line terminators
+      cout << endl;
+      
+      switch (option) {
+
+        case 1:{//Ask user for coordinates in the board
+
+            int coordinatesAreValid = 1;
+            int xCoord;
+            int yCoord;
+
+            while(!coordinatesAreValid){
+
+                cout <<"Please type X and Y coordinates to open a tile." << endl;
+
+                //Don't forget to catch empty spaces/line terminators
+
+                cin >> xCoord;//This is the horizontal coordinate
+                cin >> yCoord;//This is the vertical coordinate
+
+                if(xCoord < 0 || xCoord > boardSize){
+                    cout << "Invalid X coordinate, please try again." << endl;
+                }
+                else if(yCoord < 0 || yCoord > boardSize){
+                    cout << "Invalid Y coordinate, please try again." << endl;
+                }
+                else{
+                    coordinatesAreValid = 0;
+                }
+            }
+
+            //TODO: if coordinates match with a bomb end game, else open tile or empty spaces
+          
+          break;
         }
-        cout << endl;
-    }
 
-    cout << "Done!" << endl;
+        case 2:{//Ask user for coordinates in the board
+
+            int coordinatesAreValid = 1;
+            int xCoord;
+            int yCoord;
+
+            while(!coordinatesAreValid){
+
+                cout <<"Please type X and Y coordinates to flag a tile." << endl;
+
+                //TODO: Don't forget to catch empty spaces/line terminators
+
+                cin >> xCoord;//This is the horizontal coordinate
+                cin >> yCoord;//This is the vertical coordinate
+
+                if(xCoord < 0 || xCoord > boardSize){
+                    cout << "Invalid X coordinate, please try again." << endl;
+                }
+                else if(yCoord < 0 || yCoord > boardSize){
+                    cout << "Invalid Y coordinate, please try again." << endl;
+                }
+                else if(display[yCoord][xCoord] != coveredTile){
+                    cout<< "These coordinates do not represent a closed tile, please try again" << endl;
+                }
+                else{
+                    coordinatesAreValid = 0;
+                }
+            }
+
+            display[yCoord][xCoord] = flaggedTile;
+
+          break;
+        }
+
+        case 3:{
+          gameEnded = 0;
+          cout << endl;
+          cout << "Game Over!" << endl;
+          break;
+      }
+      }      
+    }
+    //cout << "Done!" << endl;
 
     return(0);
 }
-
