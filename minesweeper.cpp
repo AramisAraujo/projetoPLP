@@ -12,6 +12,12 @@ char* flaggedTile = "◈";
 int gameBoard[boardSize][boardSize];
 char* display[boardSize][boardSize];
 
+// User Interaction
+int x = -1;
+int y = -1;
+int option = -1;
+int finish = -1;
+
 int main(){
 
     int placedBombs = 0;
@@ -27,12 +33,12 @@ int main(){
             bombCoord[placedBombs][0] = x;//We then save the coordinates for that bomb
             bombCoord[placedBombs][1] = y;
             placedBombs++;
-            cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
+            //cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
         }
 
     }
 
-    for(int c = 0; c <= bombs; c++){
+    for(int c = 0; c < bombs; c++){
 
         int xCoord = bombCoord[c][0];
         int yCoord = bombCoord[c][1];
@@ -54,7 +60,7 @@ int main(){
         }
     }
 
-    cout << "Gameboard completed" << endl;
+    //cout << "Gameboard completed" << endl;
 
     for(int h = 0; h <= boardSize; h++){
         for(int j = 0; j <= boardSize; j++){
@@ -62,17 +68,54 @@ int main(){
         }
     }
 
-    cout << "Display Ready" << endl;
-
-    for(int a = 0; a <= boardSize; a++){
-        for(int b = 0; b <= boardSize; b++){
-            cout << display[a][b] << " ";
-        }
+    //cout << "Display Ready" << endl;
+    
+    cout << "                   #Minessweeper#" << endl;
+    cout << endl;
+    cout << endl;
+    cout << " Options" << endl;
+    cout << " 1. To open tile" << endl;
+    cout << " 2. To flag tile" << endl;
+    cout << " 3. Finish the game" << endl;
+    cout << endl;
+    cout << endl;
+    while (true){
+      for(int a = 0; a <= boardSize; a++){
+          for(int b = 0; b <= boardSize; b++){
+            if (b == 0) {
+              cout << "                 " << display[a][b] << " ";
+            }else {
+              cout << display[a][b] << " ";
+            }
+          }
+          cout << endl;
+      }
+      cout << endl;
+      cout << "Type your option: ";
+      cin >> option;
+      cout << endl;
+      
+      switch (option) {
+        case 1:
+          //Not yet          
+          break;
+        case 2:
+          // Not yet
+          break;
+        case 3:
+          finish = 1;
+          break;
+      }
+      
+      if (finish == 1){
         cout << endl;
-    }
+        cout << "Game Over!" << endl;
+        break;
+      }
 
-    cout << "Done!" << endl;
+      
+    }
+    //cout << "Done!" << endl;
 
     return(0);
 }
-
