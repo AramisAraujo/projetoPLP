@@ -5,6 +5,7 @@ using namespace std;
 
 const int boardSize = 8;//Game Board size minimum 9 (9x9 game board)
 const int bombs = int(((boardSize+ 1)*(boardSize+ 1))/10);//Bombs must be present in 10% of the game tiles
+int remainingFlags = bombs;
 
 //Game Tiles
 char* coveredTile = "■";
@@ -14,7 +15,7 @@ char* flaggedTile = "◈";
 int gameBoard[boardSize][boardSize];
 char* display[boardSize][boardSize];
 
-int showOptions(){
+int showOptions(int flags){
     int option;
   
     cout << "                   #Minesweeper#" << endl;
@@ -26,9 +27,13 @@ int showOptions(){
     cout << " 3. End game" << endl;
     cout << endl;
     cout << endl;
+    cout << " - Remaining flags: " << remainingFlags + 1;
+    cout << endl;
+    cout << endl;
     cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
     cout << endl;
-      //Prints the display board
+    
+    //Prints the display board
     for(int a = 0; a <= boardSize; a++){
         for(int b = 0; b <= boardSize; b++){
           if (b == 0) {
@@ -40,6 +45,7 @@ int showOptions(){
         cout << endl;
         cout << endl;
     }
+    
     //Asks user for interaction
     cout << endl;
     cout << "Type your option: ";
@@ -139,7 +145,7 @@ int main(){
       
       int option = 0;
       
-      option = showOptions();
+      option = showOptions(remainingFlags);
       
       switch (option) {
 
@@ -173,21 +179,25 @@ int main(){
             int coordinatesAreValid = 0;
             int xCoord;
             int yCoord;
-
-            while(!coordinatesAreValid){
-
-                cout <<"Please type X and Y coordinates to flag a tile." << endl;
-
-                //TODO: Don't forget to catch empty spaces/line terminators
-
-                cin >> xCoord;//This is the horizontal coordinate
-                cin >> yCoord;//This is the vertical coordinate
-
-                coordinatesAreValid = checkCoordinates(xCoord, yCoord);
+            
+            if (remainingFlags >= 0) {
+              while(!coordinatesAreValid){
+  
+                  cout <<"Please type X and Y coordinates to flag a tile." << endl;
+  
+                  //TODO: Don't forget to catch empty spaces/line terminators
+  
+                  cin >> xCoord;//This is the horizontal coordinate
+                  cin >> yCoord;//This is the vertical coordinate
+  
+                  coordinatesAreValid = checkCoordinates(xCoord, yCoord);
+              }
+  
+              display[yCoord][xCoord] = flaggedTile;
+              remainingFlags--;
+            }else {
+              cout << "You cannot to flag anymore!"<< endl;
             }
-
-            display[yCoord][xCoord] = flaggedTile;
-
           break;
         }
 
@@ -203,3 +213,6 @@ int main(){
 
     return(0);
 }
+
+
+
