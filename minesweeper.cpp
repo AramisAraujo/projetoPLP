@@ -14,6 +14,20 @@ char* flaggedTile = "◈";
 int gameBoard[boardSize][boardSize];
 char* display[boardSize][boardSize];
 
+int showOptions(){
+    cout << "                   #Minesweeper#" << endl;
+    cout << endl;
+    cout << endl;
+    cout << " Options" << endl;
+    cout << " 1. To open a tile" << endl;
+    cout << " 2. To flag a tile" << endl;
+    cout << " 3. End game" << endl;
+    cout << endl;
+    cout << endl;
+  return 0; 
+}
+
+
 int main(){
 
     int placedBombs = 0;
@@ -82,22 +96,14 @@ int main(){
     }
 
     //cout << "Display Ready" << endl;
-    
-    cout << "                   #Minesweeper#" << endl;
-    cout << endl;
-    cout << endl;
-    cout << " Options" << endl;
-    cout << " 1. To open a tile" << endl;
-    cout << " 2. To flag a tile" << endl;
-    cout << " 3. End game" << endl;
-    cout << endl;
-    cout << endl;
 
     int gameEnded = 1;
 
     while (gameEnded != 0){
+      
+      showOptions();
 
-        int option = 0;
+      int option = 0;
       cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
       cout << endl;
         //Prints the display board
@@ -198,3 +204,6 @@ int main(){
 
     return(0);
 }
+
+
+
