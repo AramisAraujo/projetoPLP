@@ -3,8 +3,8 @@
 
 using namespace std;
 
-const int boardSize = 8;//Game Board size minimum 9 (9x9 game board)
-const int bombs = int(((boardSize+ 1)*(boardSize+ 1))/10);//Bombs must be present in 10% of the game tiles
+const int boardSize = 9;//Game Board size minimum 9 (9x9 game board)
+const int bombs = int(((boardSize)*(boardSize))/10);//Bombs must be present in 10% of the game tiles
 int remainingFlags = bombs;
 
 //Game Tiles
@@ -34,8 +34,8 @@ int showOptions(int flags){
     cout << endl;
     
     //Prints the display board
-    for(int a = 0; a <= boardSize; a++){
-        for(int b = 0; b <= boardSize; b++){
+    for(int a = 0; a <= boardSize -1; a++){
+        for(int b = 0; b <= boardSize -1; b++){
           if (b == 0) {
             cout << "               "<< a <<"   " << display[a][b] << "   ";
           }else {
@@ -56,11 +56,11 @@ int showOptions(int flags){
 }
 
 int checkCoordinates(int x, int y){
-  if(x < 0 || x > boardSize){
+  if(x < 0 || x > boardSize - 1){
       cout << "Invalid X coordinate, please try again." << endl;
       cout << endl;
   }
-  else if(y < 0 || y > boardSize){
+  else if(y < 0 || y > boardSize - 1){
       cout << "Invalid Y coordinate, please try again." << endl;
       cout << endl;
   }
@@ -131,8 +131,8 @@ int main(){
 
     //cout << "Gameboard completed" << endl;
 
-    for(int h = 0; h <= boardSize; h++){//The display starts out as covered tiles
-        for(int j = 0; j <= boardSize; j++){
+    for(int h = 0; h <= boardSize - 1; h++){//The display starts out as covered tiles
+        for(int j = 0; j <= boardSize - 1; j++){
             display[h][j] = coveredTile;        
         }
     }
@@ -197,6 +197,7 @@ int main(){
               remainingFlags--;
             }else {
               cout << "You cannot to flag anymore!"<< endl;
+	      cout << endl;
             }
           break;
         }
