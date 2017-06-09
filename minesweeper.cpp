@@ -98,16 +98,18 @@ int main(){
     while (gameEnded != 0){
 
         int option = 0;
-
+      cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
+      cout << endl;
         //Prints the display board
       for(int a = 0; a <= boardSize; a++){
           for(int b = 0; b <= boardSize; b++){
             if (b == 0) {
-              cout << "                 " << display[a][b] << " ";
+              cout << "               "<< a <<"   " << display[a][b] << "   ";
             }else {
-              cout << display[a][b] << " ";
+              cout << display[a][b] << "   ";
             }
           }
+          cout << endl;
           cout << endl;
       }
       //Asks user for interaction
