@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 
 using namespace std;
 
@@ -8,14 +9,14 @@ const int bombs = int(((boardSize)*(boardSize))/10);//Bombs must be present in 1
 int remainingFlags = bombs;
 
 //Game Tiles
-char* coveredTile = "■";
-char* emptyTile = "□";
-char* flaggedTile = "◈";
+string coveredTile = "■";
+string emptyTile = "□";
+string flaggedTile = "◈";
 
 int gameBoard[boardSize][boardSize];
-char* display[boardSize][boardSize];
+string display[boardSize][boardSize];
 
-int showOptions(int flags){
+int showOptions(){
     int option;
   
     cout << "                   #Minesweeper#" << endl;
@@ -70,6 +71,14 @@ int checkCoordinates(int x, int y){
   return 0;
 }
 
+int gameOver() {
+  cout << endl;
+  cout << "Game Over!" << endl;
+  cout << endl;
+  cout << endl;
+  return 0;
+}
+
 int main(){
 
     int placedBombs = 0;
@@ -85,7 +94,7 @@ int main(){
             bombCoord[placedBombs][0] = y;//We then save the coordinates for that bomb
             bombCoord[placedBombs][1] = x;
             placedBombs++;
-            //cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
+            cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
 
         }
 
@@ -145,7 +154,7 @@ int main(){
       
       int option = 0;
       
-      option = showOptions(remainingFlags);
+      option = showOptions();
       
       switch (option) {
 
@@ -157,19 +166,35 @@ int main(){
 
             while(!coordinatesAreValid){
 
-                cout <<"Please type X and Y coordinates to open a tile." << endl;
+              cout <<"Please type X and Y coordinates to open a tile." << endl;
 
-                //Don't forget to catch empty spaces/line terminators
+              //Don't forget to catch empty spaces/line terminators
 
-                cin >> xCoord;//This is the horizontal coordinate
-                cin >> yCoord;//This is the vertical coordinate
-                
-                coordinatesAreValid = checkCoordinates(xCoord, yCoord);
+              cin >> xCoord;//This is the horizontal coordinate
+              cin >> yCoord;//This is the vertical coordinate
+              
+              coordinatesAreValid = checkCoordinates(xCoord, yCoord);
 
                 
             }
 
             //TODO: if coordinates match with a bomb end game, else open tile or empty spaces
+            
+            switch (gameBoard[xCoord][yCoord]) {
+              case -1:{
+                gameEnded = gameOver();
+                break;
+              }
+              case 0: {
+                display[yCoord][xCoord] = emptyTile;
+                break;
+              }default: {
+                stringstream ss;
+                ss << gameBoard[yCoord][xCoord];
+                string str = ss.str();
+                display[yCoord][xCoord] = str;
+              }      
+            }
           
           break;
         }
@@ -203,9 +228,7 @@ int main(){
         }
 
         case 3:{
-          gameEnded = 0;
-          cout << endl;
-          cout << "Game Over!" << endl;
+          gameEnded = gameOver();
           break;
       }
       }      
@@ -214,6 +237,3 @@ int main(){
 
     return(0);
 }
-
-
-
