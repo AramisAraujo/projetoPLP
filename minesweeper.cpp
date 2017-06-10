@@ -58,11 +58,11 @@ int showOptions(){
 
 int checkCoordinates(int x, int y){
   if(x < 0 || x > boardSize - 1){
-      cout << "Invalid X coordinate, please try again." << endl;
+      cout << "Invalid column coordinate, please try again." << endl;
       cout << endl;
   }
   else if(y < 0 || y > boardSize - 1){
-      cout << "Invalid Y coordinate, please try again." << endl;
+      cout << "Invalid row coordinate, please try again." << endl;
       cout << endl;
   }
   else{
@@ -166,12 +166,12 @@ int main(){
 
             while(!coordinatesAreValid){
 
-              cout <<"Please type X and Y coordinates to open a tile." << endl;
+              cout <<"Please type the row and column coordinates to flag a tile." << endl;
 
               //Don't forget to catch empty spaces/line terminators
 
-              cin >> xCoord;//This is the horizontal coordinate
-              cin >> yCoord;//This is the vertical coordinate
+              cin >> yCoord;//This is the row coordinate
+              cin >> xCoord;//This is the column coordinate
               
               coordinatesAreValid = checkCoordinates(xCoord, yCoord);
 
@@ -208,12 +208,12 @@ int main(){
             if (remainingFlags >= 0) {
               while(!coordinatesAreValid){
   
-                  cout <<"Please type X and Y coordinates to flag a tile." << endl;
+                  cout <<"Please type the row and column coordinates to flag a tile." << endl;
   
                   //TODO: Don't forget to catch empty spaces/line terminators
   
-                  cin >> xCoord;//This is the horizontal coordinate
-                  cin >> yCoord;//This is the vertical coordinate
+                  cin >> yCoord;//This is the row coordinate
+                  cin >> xCoord;//This is the column coordinate
   
                   coordinatesAreValid = checkCoordinates(xCoord, yCoord);
               }
@@ -233,7 +233,6 @@ int main(){
       }
       }      
     }
-    //cout << "Done!" << endl;
 
     return(0);
 }
