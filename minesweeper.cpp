@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ string display[boardSize][boardSize];
 
 int showOptions(){
     int option;
-  
+
     cout << "                   #Minesweeper#" << endl;
     cout << endl;
     cout << endl;
@@ -33,7 +34,7 @@ int showOptions(){
     cout << endl;
     cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
     cout << endl;
-    
+
     //Prints the display board
     for(int a = 0; a <= boardSize -1; a++){
         for(int b = 0; b <= boardSize -1; b++){
@@ -46,14 +47,14 @@ int showOptions(){
         cout << endl;
         cout << endl;
     }
-    
+
     //Asks user for interaction
     cout << endl;
     cout << "Type your option: ";
     cin >> option;
     //Don't forget to catch empty spaces/line terminators
     cout << endl;
-  return option; 
+  return option;
 }
 
 int checkCoordinates(int x, int y){
@@ -78,6 +79,91 @@ int gameOver() {
   cout << endl;
   return 0;
 }
+
+void ask_by_the_coordinate(int& xCoord, int& yCoord){
+    cout <<"Please type X and Y coordinates to open a tile." << endl;
+
+            //Don't forget to catch empty spaces/line terminators
+    cin >> xCoord;//This is the horizontal coordinate
+    cin >> yCoord;//This is the vertical coordinate
+
+}
+
+void add_valid_coordinates(int& x, int& y){
+    int coordinatesAreValid = 0;
+
+    while(!coordinatesAreValid){
+            ask_by_the_coordinate (x, y);
+            coordinatesAreValid = checkCoordinates(x, y);
+    }
+}
+
+void empty_a_tile(int& x, int& y)
+{
+    display[y][x] = emptyTile;
+}
+
+void flag_a_tile(int& x, int& y)
+{
+    display[y][x] = flaggedTile;
+}
+
+enum open_tile_reaction
+{
+    ITS_A_BOMB = -1,
+    EMPTY_TILE
+};
+
+int open_tile()
+{
+    int xCoord;
+    int yCoord;
+    add_valid_coordinates(xCoord, yCoord);
+            //TODO: if coordinates match with a bomb end game, else open tile or empty spaces
+
+    cout <<"x: " << xCoord << " y: " << yCoord << endl;//Spoilers
+    cout <<"bomb : " << gameBoard[xCoord][yCoord] << endl;//Spoilers
+
+
+
+    if(gameBoard[xCoord][yCoord] == ITS_A_BOMB)
+    {
+        return gameOver();
+    }else if(gameBoard[xCoord][yCoord] == EMPTY_TILE)
+    {
+        empty_a_tile(xCoord, yCoord);
+    }else
+    {
+        stringstream ss;
+        ss << gameBoard[yCoord][xCoord];
+        string str = ss.str();
+        display[yCoord][xCoord] = str;
+    }
+            return 1;
+}
+
+void flag_tile()
+{
+    int xCoord;
+    int yCoord;
+    add_valid_coordinates(xCoord, yCoord);
+
+    if (remainingFlags >= 0) {
+        flag_a_tile(xCoord, yCoord);
+        remainingFlags--;
+    }else {
+        cout << "You cannot to flag anymore!"<< endl;
+        cout << endl;
+    }
+}
+
+enum game_options
+{
+    OPEN_TILE = 1,
+    FLAG_TILE,
+    EXIT_GAME
+};
+
 
 int main(){
 
@@ -112,10 +198,10 @@ int main(){
         if(yCoord > 0 && xCoord - 1 >= 0 && gameBoard[yCoord - 1][xCoord - 1] > -1){//add upper left corner
             gameBoard[yCoord - 1][xCoord - 1]++;//Adding to the tile adjacent to a bomb
         }
-        
+
         if(yCoord > 0 && xCoord + 1 < boardSize && gameBoard[yCoord - 1][xCoord + 1] > -1){//add upper right corner
             gameBoard[yCoord - 1][xCoord + 1]++;//Adding to the tile adjacent to a bomb
-        }  
+        }
 
         if(yCoord < boardSize && gameBoard[yCoord + 1][xCoord] > -1){//add below bomb
             gameBoard[yCoord + 1][xCoord]++;//Adding to the tile adjacent to a bomb
@@ -124,10 +210,10 @@ int main(){
         if(yCoord < boardSize && xCoord - 1 >= 0 && gameBoard[yCoord + 1][xCoord - 1] > -1){//add lower left corner
             gameBoard[yCoord + 1][xCoord - 1]++;//Adding to the tile adjacent to a bomb
         }
-        
+
         if(yCoord < boardSize && xCoord + 1 < boardSize && gameBoard[yCoord + 1][xCoord + 1] > -1){//add lover right corner
             gameBoard[yCoord + 1][xCoord + 1]++;//Adding to the tile adjacent to a bomb
-        }  
+        }
 
         if(xCoord > 0 && gameBoard[yCoord][xCoord - 1] > -1){//add to the left of the bomb
             gameBoard[yCoord][xCoord - 1]++;//Adding to the tile adjacent to a bomb
@@ -142,7 +228,7 @@ int main(){
 
     for(int h = 0; h <= boardSize - 1; h++){//The display starts out as covered tiles
         for(int j = 0; j <= boardSize - 1; j++){
-            display[h][j] = coveredTile;        
+            display[h][j] = coveredTile;
         }
     }
 
@@ -151,88 +237,24 @@ int main(){
     int gameEnded = 1;
 
     while (gameEnded != 0){
-      
+
       int option = 0;
-      
+
       option = showOptions();
-      
-      switch (option) {
 
-        case 1:{//Ask user for coordinates in the board
-
-            int coordinatesAreValid = 0;
-            int xCoord;
-            int yCoord;
-
-            while(!coordinatesAreValid){
-
-              cout <<"Please type the row and column coordinates to flag a tile." << endl;
-
-              //Don't forget to catch empty spaces/line terminators
-
-              cin >> yCoord;//This is the row coordinate
-              cin >> xCoord;//This is the column coordinate
-              
-              coordinatesAreValid = checkCoordinates(xCoord, yCoord);
-
-                
-            }
-
-            //TODO: if coordinates match with a bomb end game, else open tile or empty spaces
-            
-            switch (gameBoard[xCoord][yCoord]) {
-              case -1:{
-                gameEnded = gameOver();
-                break;
-              }
-              case 0: {
-                display[yCoord][xCoord] = emptyTile;
-                break;
-              }default: {
-                stringstream ss;
-                ss << gameBoard[yCoord][xCoord];
-                string str = ss.str();
-                display[yCoord][xCoord] = str;
-              }      
-            }
-          
-          break;
-        }
-
-        case 2:{//Ask user for coordinates in the board
-
-            int coordinatesAreValid = 0;
-            int xCoord;
-            int yCoord;
-            
-            if (remainingFlags >= 0) {
-              while(!coordinatesAreValid){
-  
-                  cout <<"Please type the row and column coordinates to flag a tile." << endl;
-  
-                  //TODO: Don't forget to catch empty spaces/line terminators
-  
-                  cin >> yCoord;//This is the row coordinate
-                  cin >> xCoord;//This is the column coordinate
-  
-                  coordinatesAreValid = checkCoordinates(xCoord, yCoord);
-              }
-  
-              display[yCoord][xCoord] = flaggedTile;
-              remainingFlags--;
-            }else {
-              cout << "You cannot to flag anymore!"<< endl;
-	      cout << endl;
-            }
-          break;
-        }
-
-        case 3:{
+      if(option == OPEN_TILE)
+      {
+          gameEnded = open_tile();
+      }else if(option == FLAG_TILE)
+      {
+          flag_tile();
+      }else if(option == EXIT_GAME)
+      {
           gameEnded = gameOver();
-          break;
       }
-      }      
     }
 
     return(0);
 }
+
+
