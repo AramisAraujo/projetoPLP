@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
+
 using namespace std;
 
 const int boardSize = 9;//Game Board size minimum 9 (9x9 game board)
@@ -185,8 +186,14 @@ int open_tile(){
         return gameOver();
     }
 
+    else if(display[yCoord][xCoord] == flaggedTile){
+        cout <<"You cannot open flagged tiles!"<< endl;
+        return 1;
+    }
+
     else if(gameBoard[yCoord][xCoord] == EMPTY_TILE){
         openEmptyTiles(xCoord, yCoord);
+        
     }
 
     else{
@@ -194,8 +201,14 @@ int open_tile(){
         ss << gameBoard[yCoord][xCoord];
         string str = ss.str();
         display[yCoord][xCoord] = str;
+        remainingTiles--;
     }
-            return 1;
+
+    if( remainingTiles == 0){
+          return 0;
+      }
+
+    return 1;
 }
 
 void flag_tile(){
@@ -309,14 +322,15 @@ int main(){
       else if(option == EXIT_GAME){
           gameEnded = gameOver();
       }
-      else if( remainingTiles == 0){
-          cout <<"Congratulations, you won!"<< endl;
-          gameEnded = 0;
-      }
 
       else {
           cout<< "Invalid option, please insert a valid option to proceed." << endl;
       }
+    }
+
+    if(remainingTiles == 0){
+
+        cout <<"Congratulations, you won!"<< endl;
     }
 
     return(0);
