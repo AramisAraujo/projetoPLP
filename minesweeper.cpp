@@ -180,7 +180,7 @@ int open_tile(){
     getValidCoordinates(xCoord, yCoord);
 
     if(gameBoard[yCoord][xCoord] == BOMB){
-        //TODO: Fill Display with the 'answear'
+        //TODO: Fill Display with the 'answer'
         printDisplay();
         cout << "BOOOM! You have found a bomb ;)" << endl;
         return gameOver();
