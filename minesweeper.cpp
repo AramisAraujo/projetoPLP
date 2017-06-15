@@ -220,16 +220,16 @@ int open_tile(){
 void flag_tile(){
     int xCoord;
     int yCoord;
-    getValidCoordinates(xCoord, yCoord);
+    getValidCoordinates(yCoord, xCoord);
 
-    if(display[xCoord][yCoord] == flaggedTile){
+    if(display[yCoord][xCoord] == flaggedTile){
         cout << "Removing flag from tile (" << xCoord <<", " << yCoord << ")" << endl;
-        setTileCovered(yCoord, xCoord);
+        setTileCovered(xCoord, yCoord);
         remainingFlags++;
     }
 
     else if (remainingFlags >= 0) {
-        setTileFlagged(yCoord, xCoord);
+        setTileFlagged(xCoord, yCoord);
         remainingFlags--;
     }else {
         cout << "You cannot flag any more tiles!"<< endl;
