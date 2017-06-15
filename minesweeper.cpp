@@ -237,8 +237,8 @@ void flag_tile(){
     }
 }
 
-int main(){
-
+void set_bombs()
+{
     int placedBombs = 0;
     srand(time(NULL));//We need to seed the randomizer
 
@@ -256,7 +256,10 @@ int main(){
         }
 
     }
+}
 
+void set_bombs_tip()
+{
     for(int c = 0; c < bombs; c++){//Filling tiles around the bombs with tips
 
         int yCoord = bombCoords[c][0];//Get the coordinates for the bombs
@@ -295,16 +298,25 @@ int main(){
             gameBoard[yCoord][xCoord + 1]++;//Adding to the tile adjacent to a bomb
         }
     }
+}
 
+void set_initial_display()
+{
     //cout << "Gameboard completed" << endl;
 
     for(int h = 0; h <= boardSize - 1; h++){//Fills the display as covered tiles
         for(int j = 0; j <= boardSize - 1; j++){
-            display[h][j] = coveredTile;
+                setTileCovered(h,j);
         }
     }
 
     //cout << "Display Ready" << endl;
+}
+
+int main(){
+    set_bombs();
+    set_bombs_tip();
+    set_initial_display();
 
 //Game Execution Loop
     int gameEnded = 1;
