@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <sstream>
+#include <time.h>
 
 using namespace std;
 
@@ -62,9 +63,9 @@ int showOptions(){
     cout << endl;
     cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
     cout << endl;
-    
+
     printDisplay();
-    
+
     //Asks user for interaction
     cout << endl;
     cout << "Type your option: ";
@@ -81,7 +82,7 @@ int checkCoordinates(int x, int y){
       return 0;
   }
   return 1;
-  
+
 }
 
 int gameOver() {
@@ -124,6 +125,11 @@ void setTileFlagged(int& x, int& y){
     display[y][x] = flaggedTile;
 }
 
+void setTileCovered(int& x, int& y)
+{
+    display[y][x] = coveredTile;
+}
+
 int openEmptyTiles(int xCoord, int yCoord){
 
     if(!checkCoordinates(xCoord, yCoord)){//We check if the coordinates lead to a valid tile
@@ -151,15 +157,15 @@ int openEmptyTiles(int xCoord, int yCoord){
         setTileEmpty(xCoord, yCoord);
         remainingTiles--;
 
-        if(yCoord > 0){ 
+        if(yCoord > 0){
          openEmptyTiles(xCoord -1,yCoord -1);//Upper left corner
          openEmptyTiles(xCoord, yCoord -1);//Above
          openEmptyTiles(xCoord +1,yCoord -1);//Upper right corner
          }
         if(xCoord > 0){
-          
+
         openEmptyTiles(xCoord -1,yCoord);//Left
-        } 
+        }
         if(xCoord < boardSize -1){
           openEmptyTiles(xCoord +1,yCoord);//Right
         }
@@ -168,7 +174,7 @@ int openEmptyTiles(int xCoord, int yCoord){
          openEmptyTiles(xCoord, yCoord +1);//Below
          openEmptyTiles(xCoord +1,yCoord +1);//Lower right corner
         }
-        
+
     }
 
 }
@@ -177,7 +183,7 @@ int open_tile(){
     int xCoord;
     int yCoord;
 
-    getValidCoordinates(xCoord, yCoord);
+    getValidCoordinates(yCoord, xCoord);
 
     if(gameBoard[yCoord][xCoord] == BOMB){
         //TODO: Fill Display with the 'answer'
@@ -193,7 +199,7 @@ int open_tile(){
 
     else if(gameBoard[yCoord][xCoord] == EMPTY_TILE){
         openEmptyTiles(xCoord, yCoord);
-        
+
     }
 
     else{
@@ -216,14 +222,14 @@ void flag_tile(){
     int yCoord;
     getValidCoordinates(xCoord, yCoord);
 
-    if(display[yCoord][xCoord] == flaggedTile){
+    if(display[xCoord][yCoord] == flaggedTile){
         cout << "Removing flag from tile (" << xCoord <<", " << yCoord << ")" << endl;
-        setTileEmpty(xCoord, yCoord);
+        setTileCovered(yCoord, xCoord);
         remainingFlags++;
     }
 
     else if (remainingFlags >= 0) {
-        setTileFlagged(xCoord, yCoord);
+        setTileFlagged(yCoord, xCoord);
         remainingFlags--;
     }else {
         cout << "You cannot flag any more tiles!"<< endl;
@@ -306,7 +312,7 @@ int main(){
     while (gameEnded != 0){
 
       int option = 0;
-      
+
       cout << "Remaining Tiles: " << remainingTiles << endl;
 
       option = showOptions();
