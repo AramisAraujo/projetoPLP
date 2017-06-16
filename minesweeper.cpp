@@ -33,10 +33,11 @@ enum tileStates{
 
 void printDisplay(){
   //Prints the display board
+
   for(int a = 0; a <= boardSize -1; a++){
       for(int b = 0; b <= boardSize -1; b++){
         if (b == 0) {
-          cout << "               "<< a <<"   " << display[a][b] << "   ";
+          cout << "               "<< a <<" ▶  " << display[a][b] << "   ";
         }else {
           cout << display[a][b] << "   ";
         }
@@ -58,10 +59,11 @@ int showOptions(){
     cout << " 3. To end the game" << endl;
     cout << endl;
     cout << endl;
-    cout << " - Remaining flags: " << remainingFlags + 1;
+    cout << " ▶ Remaining flags: " << remainingFlags + 1 << " 🏴";
     cout << endl;
     cout << endl;
-    cout << "                   0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
+    cout << "                    0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
+    cout << "                    ▼   "<< "▼   " << "▼   " << "▼   "<< "▼   "<< "▼   "<< "▼   "<< "▼   "<< "▼   "<< endl;
     cout << endl;
 
     printDisplay();
@@ -97,8 +99,8 @@ int gameOver() {
 void askForCoordinates(int& xCoord, int& yCoord){
     cout <<"Please type Row and Column coordinates to open a tile." << endl;
 
-    cin >> xCoord;//This is the Row (horizontal) coordinate
     cin >> yCoord;//This is the Column (vertical) coordinate
+    cin >> xCoord;//This is the Row (horizontal) coordinate
 
 }
 
@@ -138,9 +140,6 @@ int openEmptyTiles(int xCoord, int yCoord){
     if(display[yCoord][xCoord] != coveredTile){//We only want to keep going on covered tiles
       return 0;
     }
-    else if(gameBoard[yCoord][xCoord] == -1){//We must stop on bombs (technically this should never be true)
-        return 0;
-    }
 
     else if(gameBoard[yCoord][xCoord] > 0){//If we found a number around a bomb, we must stop
         stringstream ss;
@@ -153,7 +152,7 @@ int openEmptyTiles(int xCoord, int yCoord){
         remainingTiles--;
         return 0;
     }
-    else{//We then proceed to the adjacent tiles
+    else{//We then open this one and proceed to the adjacent tiles
         setTileEmpty(xCoord, yCoord);
         remainingTiles--;
 
@@ -179,16 +178,39 @@ int openEmptyTiles(int xCoord, int yCoord){
 
 }
 
-int open_tile(){
+void displayAnswer(){
+    for (int y = 0; y < boardSize; y++){
+        for(int x = 0; x < boardSize; x++){
+
+            if(display[y][x] == coveredTile || display[y][x] == flaggedTile){
+
+                if(gameBoard[y][x] == -1){
+                    display[y][x] = bombTile;
+                }
+
+                else if(gameBoard[y][x] == 0){
+                    display[y][x] = emptyTile;
+                }
+
+                else{
+                    stringstream ss;
+                    ss << gameBoard[y][x];
+                    string str = ss.str();
+                    display[y][x] = str;
+                }
+            }
+        }
+    }
+}
+
+int openTile(){
     int xCoord;
     int yCoord;
 
-    getValidCoordinates(yCoord, xCoord);
+    getValidCoordinates(xCoord, yCoord);
 
     if(gameBoard[yCoord][xCoord] == BOMB){
-        //TODO: Fill Display with the 'answer'
-        printDisplay();
-        cout << "BOOOM! You have found a bomb ;)" << endl;
+        cout << endl << "BOOOM! You have found a bomb ;)" << endl;
         return gameOver();
     }
 
@@ -217,13 +239,12 @@ int open_tile(){
     return 1;
 }
 
-void flag_tile(){
+void flagTile(){
     int xCoord;
     int yCoord;
-    getValidCoordinates(yCoord, xCoord);
+    getValidCoordinates(xCoord, yCoord);
 
     if(display[yCoord][xCoord] == flaggedTile){
-        cout << "Removing flag from tile (" << xCoord <<", " << yCoord << ")" << endl;
         setTileCovered(xCoord, yCoord);
         remainingFlags++;
     }
@@ -237,8 +258,7 @@ void flag_tile(){
     }
 }
 
-void set_bombs()
-{
+void setBombs(){
     int placedBombs = 0;
     srand(time(NULL));//We need to seed the randomizer
 
@@ -251,21 +271,17 @@ void set_bombs()
             bombCoords[placedBombs][0] = y;//We then save the coordinates for that bomb
             bombCoords[placedBombs][1] = x;
             placedBombs++;
-            //cout <<"Placed a bomb on x: " << x << " y: " << y << endl;//Spoilers
-
         }
 
     }
 }
 
-void set_bombs_tip()
-{
+void setTips(){
     for(int c = 0; c < bombs; c++){//Filling tiles around the bombs with tips
 
         int yCoord = bombCoords[c][0];//Get the coordinates for the bombs
         int xCoord = bombCoords[c][1];
 
-        //TODO: make this mess into function calls
         if(yCoord > 0 && gameBoard[yCoord - 1][xCoord] > -1){//Add above bomb
             gameBoard[yCoord - 1][xCoord]++;//Adding to the tile adjacent to a bomb
         }
@@ -300,23 +316,20 @@ void set_bombs_tip()
     }
 }
 
-void set_initial_display()
-{
-    //cout << "Gameboard completed" << endl;
-
+void fillDisplay(){
     for(int h = 0; h <= boardSize - 1; h++){//Fills the display as covered tiles
         for(int j = 0; j <= boardSize - 1; j++){
                 setTileCovered(h,j);
         }
     }
 
-    //cout << "Display Ready" << endl;
 }
 
 int main(){
-    set_bombs();
-    set_bombs_tip();
-    set_initial_display();
+
+    setBombs();
+    setTips();
+    fillDisplay();
 
 //Game Execution Loop
     int gameEnded = 1;
@@ -325,16 +338,14 @@ int main(){
 
       int option = 0;
 
-      cout << "Remaining Tiles: " << remainingTiles << endl;
-
       option = showOptions();
 
       if(option == OPEN_TILE){
-          gameEnded = open_tile();
+          gameEnded = openTile();
       }
 
       else if(option == FLAG_TILE){
-          flag_tile();
+          flagTile();
       }
 
       else if(option == EXIT_GAME){
@@ -350,6 +361,9 @@ int main(){
 
         cout <<"Congratulations, you won!"<< endl;
     }
+
+    displayAnswer();
+    printDisplay();
 
     return(0);
 }
