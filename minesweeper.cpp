@@ -50,6 +50,21 @@ void printDisplay(){
 int showOptions(){
     int option;
     score = round((100 - remainingTiles/float(((boardSize*boardSize) - bombs))*100));
+    
+    string numIndicator = "                    ";
+    string arrowIndicator = "                    ";
+    
+    for(int i = 0; i < boardSize; i++){
+        stringstream ss;
+        
+        ss << i;
+        string count = ss.str();
+        
+        numIndicator = numIndicator + count + "   ";
+        arrowIndicator = arrowIndicator + "▼   ";
+        
+    }
+    
     cout << "                   #Minesweeper#" << endl;
     cout << endl;
     cout << endl;
@@ -62,8 +77,8 @@ int showOptions(){
     cout << " ▶ Remaining flags: " << remainingFlags + 1 << " 🏴";
     cout << endl;
     cout << endl;
-    cout << "                    0   "<< "1   " << "2   " << "3   "<< "4   "<< "5   "<< "6   "<< "7   "<< "8   "<< endl;
-    cout << "                    ▼   "<< "▼   " << "▼   " << "▼   "<< "▼   "<< "▼   "<< "▼   "<< "▼   "<< "▼   "<< endl;
+    cout << numIndicator << endl;
+    cout << arrowIndicator << endl;
     cout << endl;
 
     printDisplay();
@@ -99,9 +114,9 @@ int gameOver() {
 
 void askForCoordinates(int& xCoord, int& yCoord){
     cout <<"Please type Row and Column coordinates to open a tile." << endl;
-
-    cin >> xCoord;//This is the Row (horizontal) coordinate
+    
     cin >> yCoord;//This is the Column (vertical) coordinate
+    cin >> xCoord;//This is the Row (horizontal) coordinate
 
 }
 
