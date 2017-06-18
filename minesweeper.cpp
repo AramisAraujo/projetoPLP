@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <time.h>
-
+#include <math.h>
 using namespace std;
 
 const int boardSize = 9;//Game Board size minimum 9 (9x9 game board)
@@ -19,7 +19,7 @@ string bombTile = "💣";
 int gameBoard[boardSize][boardSize];
 string display[boardSize][boardSize];
 int bombCoords[bombs][2];
-
+int score;
 enum gameOptions{
     OPEN_TILE = 1,
     FLAG_TILE,
@@ -49,7 +49,7 @@ void printDisplay(){
 
 int showOptions(){
     int option;
-
+    score = round((100 - remainingTiles/float(((boardSize*boardSize) - bombs))*100));
     cout << "                   #Minesweeper#" << endl;
     cout << endl;
     cout << endl;
@@ -70,6 +70,7 @@ int showOptions(){
 
     //Asks user for interaction
     cout << endl;
+    cout << "Score:"<< score <<" point(s)" << endl;
     cout << "Type your option: ";
     cin >> option;
     cout << endl;
@@ -99,8 +100,8 @@ int gameOver() {
 void askForCoordinates(int& xCoord, int& yCoord){
     cout <<"Please type Row and Column coordinates to open a tile." << endl;
 
-    cin >> yCoord;//This is the Column (vertical) coordinate
     cin >> xCoord;//This is the Row (horizontal) coordinate
+    cin >> yCoord;//This is the Column (vertical) coordinate
 
 }
 
@@ -221,15 +222,16 @@ int openTile(){
 
     else if(gameBoard[yCoord][xCoord] == EMPTY_TILE){
         openEmptyTiles(xCoord, yCoord);
-
     }
 
     else{
         stringstream ss;
         ss << gameBoard[yCoord][xCoord];
         string str = ss.str();
-        display[yCoord][xCoord] = str;
-        remainingTiles--;
+        if(display[yCoord][xCoord]!=str){
+            display[yCoord][xCoord] = str;
+            remainingTiles--;
+        }
     }
 
     if( remainingTiles == 0){
