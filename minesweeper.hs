@@ -48,15 +48,15 @@ editBoardAt board coords element = editRowAt board coords 0 element
 editRowAt :: [[a]] -> (Int,Int) -> Int -> a -> [[a]]
 editRowAt [] coords nRow element = []
 editRowAt (b:bs) (xCoord,yCoord) nRow element 
-	|nRow == xCoord = [(editLineAt b yCoord 0 element) ++ bs] --change element in this line and put them back together
-	|otherwise = b ++ (editRowAt bs (xCoord,yCoord) (nRow + 1) element) --Keep iterating
+	|nRow == xCoord = (editLineAt b yCoord 0 element) : bs --change element in this line and put them back together
+	|otherwise = b : (editRowAt bs (xCoord,yCoord) (nRow + 1) element) --Keep iterating
 
 
 editLineAt :: [a] -> Int -> Int -> a -> [a]
 editLineAt [] yCoord nColumn element = []
 editLineAt (l:ls) yCoord nColumn element 
 	|nColumn == yCoord = element : ls -- Change the element in that position
-	|otherwise = editLineAt ls yCoord (nColumn + 1) element
+	|otherwise = l : (editLineAt ls yCoord (nColumn + 1) element)
 
 
 main = do
@@ -68,5 +68,9 @@ main = do
 	printBoard iGameboard
 
 	printDisplay iDisplay
+
+	putStrLn " "
+
+	printDisplay (editBoardAt iDisplay (3,5) emptyTile) 
 
 	putStrLn "Not Yet Implemented"
