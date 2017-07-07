@@ -69,7 +69,17 @@ validCoordinates [] = []
 validCoordinates ((xCoord,yCoord):xs)
     | xCoord<boardSize && yCoord<boardSize && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
     | otherwise = validCoordinates xs
+-- Method that return the bombs positions
 
+tuples :: [(Int,Int)]
+tuples = generateTuples 9 []
+ 
+generateTuples :: Int -> [(Int,Int)] -> [(Int,Int)]
+generateTuples 0 (x:xs) = []
+generateTuples quantity [] = (generateTuples (quantity - 1) [(random (0, boardSize-1),random (0, boardSize-1))])
+generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTuples quantity (x:xs)
+        else coordinates:(generateTuples (quantity - 1) ((x:xs)++[coordinates]))
+            where coordinates = (random (0, boardSize-1),random (0, boardSize-1))
 			
 main = do
 	
