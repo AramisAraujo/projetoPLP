@@ -1,6 +1,6 @@
 import Data.List
 import System.IO
-import Data.Tuple.Select
+
 --import System.Random
 
 --Game Tile Constants
@@ -60,7 +60,7 @@ editLineAt (l:ls) yCoord nColumn element
 	|otherwise = l : (editLineAt ls yCoord (nColumn + 1) element)
 
 getElement ::[[a]] -> (Int, Int) -> a
-getElement matrix coords = matrix !! (sel1 coords) !! (sel2 coords)
+getElement matrix (x, y) = matrix !! x !! y
 
 
 main = do
