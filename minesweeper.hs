@@ -60,7 +60,17 @@ editLineAt (l:ls) yCoord nColumn element
 getElement ::[[a]] -> (Int, Int) -> a
 getElement matrix (x, y) = matrix !! x !! y
 
+-- Method that return the adjacent positions
+adjacentCoordinates :: (Int,Int) -> [(Int,Int)]
+adjacentCoordinates (xCoord,yCoord) = validCoordinates [(xCoord-1,yCoord-1), (xCoord-1,yCoord), (xCoord-1,yCoord+1), (xCoord,yCoord-1), (xCoord,yCoord+1), (xCoord+1,yCoord-1), (xCoord+1,yCoord), (xCoord+1,yCoord+1)]
+ 
+validCoordinates :: [(Int,Int)] -> [(Int,Int)]
+validCoordinates [] = []
+validCoordinates ((xCoord,yCoord):xs)
+    | xCoord<boardSize && yCoord<boardSize && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
+    | otherwise = validCoordinates xs
 
+			
 main = do
 	
 	let amountBombs = getAmountBombs boardSize bombDensity
