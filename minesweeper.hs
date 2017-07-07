@@ -1,7 +1,6 @@
 import Data.List
 import System.IO
-
---import System.Random
+import System.Random
 
 --Game Tile Constants
 coveredTile = '■'
@@ -35,9 +34,10 @@ printDisplay displayBoard = do
 formatLine :: String -> String
 formatLine line =  formatLineAux line (length line)
 
-formatLineAux :: String -> Int -> String
-formatLineAux line 1 = line
-formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
+	where 
+		formatLineAux :: String -> Int -> String
+		formatLineAux line 1 = line
+		formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
 
 
 --List operation related functions
@@ -45,13 +45,11 @@ formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
 editBoardAt :: [[a]] -> (Int,Int) -> a -> [[a]]
 editBoardAt board coords element = editRowAt board coords 0 element
 
-
 editRowAt :: [[a]] -> (Int,Int) -> Int -> a -> [[a]]
 editRowAt [] coords nRow element = []
 editRowAt (b:bs) (xCoord,yCoord) nRow element 
 	|nRow == xCoord = (editLineAt b yCoord 0 element) : bs --change element in this line and put them back together
 	|otherwise = b : (editRowAt bs (xCoord,yCoord) (nRow + 1) element) --Keep iterating
-
 
 editLineAt :: [a] -> Int -> Int -> a -> [a]
 editLineAt [] yCoord nColumn element = []
@@ -75,6 +73,8 @@ main = do
 
 	putStrLn " "
 
-	printDisplay (editBoardAt iDisplay (3,5) emptyTile) 
+	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
+
+	--putChar (getElement (editBoardAt iDisplay (3,5) bombTile) (3,5)) 
 
 	putStrLn "Not Yet Implemented"
