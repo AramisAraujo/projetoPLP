@@ -1,6 +1,6 @@
 import Data.List
 import System.IO
---import System.Random
+import System.Random
 
 --Game Tile Constants
 coveredTile = '■'
@@ -34,9 +34,10 @@ printDisplay displayBoard = do
 formatLine :: String -> String
 formatLine line =  formatLineAux line (length line)
 
-formatLineAux :: String -> Int -> String
-formatLineAux line 1 = line
-formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
+	where 
+		formatLineAux :: String -> Int -> String
+		formatLineAux line 1 = line
+		formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
 
 
 --List operation related functions
@@ -44,13 +45,11 @@ formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
 editBoardAt :: [[a]] -> (Int,Int) -> a -> [[a]]
 editBoardAt board coords element = editRowAt board coords 0 element
 
-
 editRowAt :: [[a]] -> (Int,Int) -> Int -> a -> [[a]]
 editRowAt [] coords nRow element = []
 editRowAt (b:bs) (xCoord,yCoord) nRow element 
 	|nRow == xCoord = (editLineAt b yCoord 0 element) : bs --change element in this line and put them back together
 	|otherwise = b : (editRowAt bs (xCoord,yCoord) (nRow + 1) element) --Keep iterating
-
 
 editLineAt :: [a] -> Int -> Int -> a -> [a]
 editLineAt [] yCoord nColumn element = []
@@ -58,7 +57,30 @@ editLineAt (l:ls) yCoord nColumn element
 	|nColumn == yCoord = element : ls -- Change the element in that position
 	|otherwise = l : (editLineAt ls yCoord (nColumn + 1) element)
 
+getElement ::[[a]] -> (Int, Int) -> a
+getElement matrix (x, y) = matrix !! x !! y
 
+-- Method that return the adjacent positions
+adjacentCoordinates :: (Int,Int) -> [(Int,Int)]
+adjacentCoordinates (xCoord,yCoord) = validCoordinates [(xCoord-1,yCoord-1), (xCoord-1,yCoord), (xCoord-1,yCoord+1), (xCoord,yCoord-1), (xCoord,yCoord+1), (xCoord+1,yCoord-1), (xCoord+1,yCoord), (xCoord+1,yCoord+1)]
+ 
+validCoordinates :: [(Int,Int)] -> [(Int,Int)]
+validCoordinates [] = []
+validCoordinates ((xCoord,yCoord):xs)
+    | xCoord<boardSize && yCoord<boardSize && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
+    | otherwise = validCoordinates xs
+-- Method that return the bombs positions
+
+tuples :: [(Int,Int)]
+tuples = generateTuples 9 []
+ 
+generateTuples :: Int -> [(Int,Int)] -> [(Int,Int)]
+generateTuples 0 (x:xs) = []
+generateTuples quantity [] = (generateTuples (quantity - 1) [(random (0, boardSize-1),random (0, boardSize-1))])
+generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTuples quantity (x:xs)
+        else coordinates:(generateTuples (quantity - 1) ((x:xs)++[coordinates]))
+            where coordinates = (random (0, boardSize-1),random (0, boardSize-1))
+			
 main = do
 	
 	let amountBombs = getAmountBombs boardSize bombDensity
@@ -71,6 +93,8 @@ main = do
 
 	putStrLn " "
 
-	printDisplay (editBoardAt iDisplay (3,5) emptyTile) 
+	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
+
+	--putChar (getElement (editBoardAt iDisplay (3,5) bombTile) (3,5)) 
 
 	putStrLn "Not Yet Implemented"
