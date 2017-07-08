@@ -64,22 +64,30 @@ getElement matrix (x, y) = matrix !! x !! y
 adjacentCoordinates :: (Int,Int) -> [(Int,Int)]
 adjacentCoordinates (xCoord,yCoord) = validCoordinates [(xCoord-1,yCoord-1), (xCoord-1,yCoord), (xCoord-1,yCoord+1), (xCoord,yCoord-1), (xCoord,yCoord+1), (xCoord+1,yCoord-1), (xCoord+1,yCoord), (xCoord+1,yCoord+1)]
  
-validCoordinates :: [(Int,Int)] -> [(Int,Int)]
-validCoordinates [] = []
+validCoordinates :: [(Int,Int)] -> Int -> [(Int,Int)]
+validCoordinates [] n = []
 validCoordinates ((xCoord,yCoord):xs)
-    | xCoord<boardSize && yCoord<boardSize && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
+    | xCoord<n && yCoord<n && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
     | otherwise = validCoordinates xs
 -- Method that return the bombs positions
 
 tuples :: [(Int,Int)]
 tuples = generateTuples 9 []
  
-generateTuples :: Int -> [(Int,Int)] -> [(Int,Int)]
-generateTuples 0 (x:xs) = []
-generateTuples quantity [] = (generateTuples (quantity - 1) [(random (0, boardSize-1),random (0, boardSize-1))])
+generateTuples :: Int -> Int -> [(Int,Int)] -> [(Int,Int)]
+generateTuples 0 n(x:xs) = []
+generateTuples quantity [] = (generateTuples (quantity - 1) [(random (0, n-1),random (0, n-1))])
 generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTuples quantity (x:xs)
         else coordinates:(generateTuples (quantity - 1) ((x:xs)++[coordinates]))
-            where coordinates = (random (0, boardSize-1),random (0, boardSize-1))
+            where coordinates = (random (0, n-1),random (0, n-1))
+			
+-- Points
+points :: Int
+points = 0
+
+-- Game title
+title :: IO ()
+title = putStrLn "\n *** Minesweeper *** \n"
 			
 main = do
 	
