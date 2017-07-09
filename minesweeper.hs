@@ -115,7 +115,11 @@ emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
     |(validPlace matrix (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = (xCoord,yCoord):(emptyPlaces matrix xs (y:ys))
     |otherwise = emptyPlaces matrix xs (y:ys)
 
-
+-- testa se a posição na matriz é uma emptyTile
+emptyPlace :: [[Char]] -> (Int,Int)-> Bool 
+emptyPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == '□'
+	
+	
 -- testa se a posição na matriz não é uma bomba 
 validPlace ::[[Char]] -> (Int,Int) -> Bool 
 validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) /= '💣'
