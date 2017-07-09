@@ -116,6 +116,10 @@ emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
     |otherwise = emptyPlaces matrix xs (y:ys)
 
 
+-- testa se a posição na matriz não é uma bomba 
+validPlace ::[[Char]] -> (Int,Int) -> Bool 
+validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) /= '💣'
+
 -- Game title
 title :: IO ()
 title = putStrLn "\n *** Minesweeper *** \n"
