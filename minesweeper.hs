@@ -85,6 +85,33 @@ generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTu
 points :: Int
 points = 0
 
+
+
+-- Retorna apenas posições que não são bombas e que não estão contidas no array	
+emptyPlaces :: [[Char]] -> [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
+emptyPlaces matrix [] (y:ys) = []
+emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
+    |(validPlace matrix (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = (xCoord,yCoord):(emptyPlaces matrix xs (y:ys))
+    |otherwise = emptyPlaces matrix xs (y:ys)
+	
+--Retorna as posições que serão abertas no array
+getPlace :: [[Char]] -> [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
+getPlace matrix [] (y:ys) = (y:ys) 
+getPlace matrix (x:xs) (y:ys)
+    |(emptyPlace matrix x) == True =  getPlace matrix (xs++adjacent) (x:(y:ys))
+    |otherwise = if validPlace matrix x then getPlace matrix xs (x:(y:ys))
+             else getPlace matrix xs (y:ys)
+    where adjacent = emptyPlaces matrix (adjacentCoordinates x) ((y:ys)++xs)	
+
+-- testa se a posição na matriz é uma emptyTile
+emptyPlace :: [[Char]] -> (Int,Int)-> Bool 
+emptyPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == '□'
+	
+	
+-- testa se a posição na matriz não é uma bomba 
+validPlace ::[[Char]] -> (Int,Int) -> Bool 
+validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) /= '💣'
+
 -- Game title
 title :: IO ()
 title = putStrLn "\n *** Minesweeper *** \n"
