@@ -85,29 +85,8 @@ generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTu
 points :: Int
 points = 0
 
--- Olha se as posições não são bombas e se já não estão no array de posições que serão abertas na matriz
-whitePlaces :: [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
-whitePlaces [] (y:ys) = []
-whitePlaces ((xCoord,yCoord):xs) (y:ys)
-    |(validPlace (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = [(xCoord,yCoord)]:whitePlaces xs
-    |otherwise = whitePlaces xs
 
--- testa se a posição na matriz é uma emptyTile
-whitePlace :: [[a]] -> (Int,Int)-> Bool 
-whitePlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == emptyTile
 
--- testa se a posição na matriz não é uma bomba
-validPlace ::[[a]] -> (Int,Int) -> Bool 
-validPlace (xCoord,yCoord) = getElement matrix (xCoord,yCoord) /= bombTile
-
--- pega recursivamente as posição na matriz que serão abertas e retorna um array com todas as posições que deverão ser abertas.
-getPlace :: [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
-getPlace [] (y:ys) = (y:ys) 
-getPlace ((xCoord,yCoord):xs) (y:ys)
-    |whitePlace matrix (xCoord,yCoord) == True =  getPlace (xs:adjacent) ((xCoord,yCoord):(y:ys))
-    |otherwise = if numberPlace (xCoord,yCoord) then getPlace xs ((xCoord,yCoord):(y:ys))
-             else getPlace xs (y:ys)
-    where adjacent = whitePlaces (adjacentCoordinates (xCoord,yCoord)) (y:ys)
 -- Retorna apenas posições que não são bombas e que não estão contidas no array	
 emptyPlaces :: [[Char]] -> [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
 emptyPlaces matrix [] (y:ys) = []
