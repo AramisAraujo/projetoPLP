@@ -114,6 +114,15 @@ emptyPlaces matrix [] (y:ys) = []
 emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
     |(validPlace matrix (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = (xCoord,yCoord):(emptyPlaces matrix xs (y:ys))
     |otherwise = emptyPlaces matrix xs (y:ys)
+	
+--Retorna as posições que serão abertas no array
+getPlace :: [[Char]] -> [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
+getPlace matrix [] (y:ys) = (y:ys) 
+getPlace matrix (x:xs) (y:ys)
+    |(emptyPlace matrix x) == True =  getPlace matrix (xs++adjacent) (x:(y:ys))
+    |otherwise = if validPlace matrix x then getPlace matrix xs (x:(y:ys))
+             else getPlace matrix xs (y:ys)
+    where adjacent = emptyPlaces matrix (adjacentCoordinates x) ((y:ys)++xs)	
 
 -- testa se a posição na matriz é uma emptyTile
 emptyPlace :: [[Char]] -> (Int,Int)-> Bool 
