@@ -1,5 +1,6 @@
 import Data.List
 import System.IO
+import System.IO.Unsafe
 import System.Random
 
 --Game Tile Constants
@@ -60,61 +61,102 @@ editLineAt (l:ls) yCoord nColumn element
 getElement ::[[a]] -> (Int, Int) -> a
 getElement matrix (x, y) = matrix !! x !! y
 
--- Method that return the adjacent positions
-adjacentCoordinates :: (Int,Int) -> [(Int,Int)]
-adjacentCoordinates (xCoord,yCoord) = validCoordinates [(xCoord-1,yCoord-1), (xCoord-1,yCoord), (xCoord-1,yCoord+1), (xCoord,yCoord-1), (xCoord,yCoord+1), (xCoord+1,yCoord-1), (xCoord+1,yCoord), (xCoord+1,yCoord+1)]
- 
-validCoordinates :: [(Int,Int)] -> Int -> [(Int,Int)]
-validCoordinates [] n = []
-validCoordinates ((xCoord,yCoord):xs)
-    | xCoord<n && yCoord<n && xCoord>=0 && yCoord>=0 = (xCoord,yCoord):validCoordinates xs
-    | otherwise = validCoordinates xs
--- Method that return the bombs positions
+-- Method that return the adjacent positions of a coordinate
+getAdjCoordinates :: (Int,Int) -> Int -> [(Int,Int)]
+getAdjCoordinates (x,y) boardSize = validateCoordinates [upperLeft x y, up x y, upperRight x y, left x y, right x y,
+ lowerLeft x y, down x y, lowerRight x y] boardSize
+	
+	where 
+		upperLeft x y = (x-1,y-1)
 
-tuples :: [(Int,Int)]
-tuples = generateTuples 9 []
- 
-generateTuples :: Int -> Int -> [(Int,Int)] -> [(Int,Int)]
-generateTuples 0 n(x:xs) = []
-generateTuples quantity [] = (generateTuples (quantity - 1) [(random (0, n-1),random (0, n-1))])
-generateTuples quantity (x:xs) = if (coordinates `elem` (x:xs)) then  generateTuples quantity (x:xs)
-        else coordinates:(generateTuples (quantity - 1) ((x:xs)++[coordinates]))
-            where coordinates = (random (0, n-1),random (0, n-1))
-			
--- Points
-points :: Int
-points = 0
+		up x y = (x-1,y)
+		
+		upperRight x y = (x-1,y+1)
+		
+		left x y = (x,y-1) 
+		
+		right x y = (x,y+1)
+		
+		lowerLeft x y = (x+1,y-1)
+		
+		down x y = (x+1,y)
+		
+		lowerRight x y = (x+1,y+1)
+
+-- Evaluates valid coordinates from a list
+validateCoordinates :: [(Int,Int)] -> Int -> [(Int,Int)]
+validateCoordinates [] boardSize = []
+validateCoordinates ((xCoord,yCoord):xs) boardSize
+    | (xCoord < boardSize && yCoord < boardSize) && (xCoord >= 0 && yCoord >= 0) = (xCoord,yCoord):validateCoordinates xs boardSize
+    | otherwise = validateCoordinates xs boardSize
+
+-- Returns a list of random coodinates given a threshold
+getRandomCoords :: Int -> Int -> [(Int,Int)]
+getRandomCoords amount boardSize = genRandomCoords amount boardSize []
+
+--Generates a list of different coordinates (randomly choosen)
+genRandomCoords :: Int -> Int -> [(Int,Int)] -> [(Int,Int)]
+genRandomCoords 0 bSize coords = coords
+genRandomCoords amount bSize [] = genRandomCoords (amount - 1) bSize [getRndTuple (bSize - 1)]
+genRandomCoords amount bSize coords = do
+	let sample = getRndTuple (bSize - 1)
+	if (sample `elem` coords) == True then genRandomCoords amount bSize coords
+		else genRandomCoords (amount - 1) bSize (sample : coords)
+
+--Generates a tuple of random Int
+getRndTuple :: Int -> (Int,Int)
+getRndTuple threshold = (getRandomIntR(0,threshold), getRandomIntR(0,threshold))
+
+--Generates a random Int from a range (not safe, may cause side effects)
+getRandomIntR :: (Int,Int) -> Int
+getRandomIntR (x,y) = unsafePerformIO (randomRIO (x,y))
 
 
+--getAdjEmpSpaces :: [[Int]] -> (Int,Int) -> [(Int, Int)]
+--getAdjEmpSpaces gBoard coords = getAdjacentSpaces gBoard coords []
 
--- Retorna apenas posições que não são bombas e que não estão contidas no array	
-emptyPlaces :: [[Char]] -> [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
+--getAdjacentSpaces :: [[Int]] -> (Int, Int) -> [(Int, Int)] 
+--getAdjacentSpaces gBoard coords = 
+
+{-
+whiteSpaceLoop :: [[Int]] -> (Int,Int) -> [(Int, Int)] -> [(Int, Int)]
+whiteSpaceLoop gBoard coords [] = []
+whiteSpaceLoop gBoard coords spaces = [(x,y) | (x,y) <- (getAdjCoordinates coords (length gBoard)), isWhiteSpot gBoard (x,y)]
+
+
+isWhiteSpot :: [[Int]] -> (Int,Int) -> Bool
+isWhiteSpot gBoard coords = (getElement gBoard coords) == 0
+
+-}
+
+--Retorna apenas posições que não são bombas e que não estão contidas no array	
+emptyPlaces :: [[Int]] -> [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
 emptyPlaces matrix [] (y:ys) = []
 emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
     |(validPlace matrix (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = (xCoord,yCoord):(emptyPlaces matrix xs (y:ys))
     |otherwise = emptyPlaces matrix xs (y:ys)
 	
 --Retorna as posições que serão abertas no array
-getPlace :: [[Char]] -> [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
-getPlace matrix [] (y:ys) = (y:ys) 
-getPlace matrix (x:xs) (y:ys)
-    |(emptyPlace matrix x) == True =  getPlace matrix (xs++adjacent) (x:(y:ys))
-    |otherwise = if validPlace matrix x then getPlace matrix xs (x:(y:ys))
-             else getPlace matrix xs (y:ys)
-    where adjacent = emptyPlaces matrix (adjacentCoordinates x) ((y:ys)++xs)	
+getPlace :: [[Int]] -> [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
+getPlace matrix [] results = results 
+getPlace matrix (coord:adjCoords) results
+    |(emptyPlace matrix coord) == True =  getPlace matrix (adjCoords++adjacent) (coord:results)
+    |otherwise = if validPlace matrix coord then getPlace matrix adjCoords (coord:results)
+             else getPlace matrix adjCoords results
+    where adjacent = emptyPlaces matrix (getAdjCoordinates coord (length matrix)) (results++adjCoords)	
 
 -- testa se a posição na matriz é uma emptyTile
-emptyPlace :: [[Char]] -> (Int,Int)-> Bool 
-emptyPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == '□'
+emptyPlace :: [[Int]] -> (Int,Int)-> Bool 
+emptyPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == 0
 	
 	
 -- testa se a posição na matriz não é uma bomba 
-validPlace ::[[Char]] -> (Int,Int) -> Bool 
-validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) /= '💣'
+validPlace ::[[Int]] -> (Int,Int) -> Bool 
+validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == -1
 
 -- Game title
-title :: IO ()
-title = putStrLn "\n *** Minesweeper *** \n"
+getTitle :: IO ()
+getTitle = putStrLn "\n *** Minesweeper *** \n"
 			
 main = do
 	
@@ -130,6 +172,20 @@ main = do
 
 	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
 
-	--putChar (getElement (editBoardAt iDisplay (3,5) bombTile) (3,5)) 
+	--putChar (getElement (editBoardAt iDisplay (3,5) bombTile) (3,5))
+
+	let testB = [[0,0,1,0,0,0,0,0,0],
+				 [0,1,0,0,0,0,0,0,0],
+				 [1,0,0,0,0,0,0,0,0],
+ 				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,0,0,0,0,0,0,0]]
+
+	print (getPlace testB [(0,0)] [] )
+
+
 
 	putStrLn "Not Yet Implemented"
