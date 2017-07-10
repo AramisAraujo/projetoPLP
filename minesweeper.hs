@@ -62,8 +62,8 @@ getElement ::[[a]] -> (Int, Int) -> a
 getElement matrix (x, y) = matrix !! x !! y
 
 -- Method that return the adjacent positions of a coordinate
-getAdjCoordinates :: (Int,Int) -> Int -> [(Int,Int)]
-getAdjCoordinates (x,y) boardSize = validateCoordinates [upperLeft x y, up x y, upperRight x y, left x y, right x y,
+getAdjCoords :: Int -> (Int,Int)  -> [(Int,Int)]
+getAdjCoords boardSize (x,y) = validateCoordinates [upperLeft x y, up x y, upperRight x y, left x y, right x y,
  lowerLeft x y, down x y, lowerRight x y] boardSize
 	
 	where 
@@ -111,53 +111,32 @@ getRndTuple threshold = (getRandomIntR(0,threshold), getRandomIntR(0,threshold))
 getRandomIntR :: (Int,Int) -> Int
 getRandomIntR (x,y) = unsafePerformIO (randomRIO (x,y))
 
-
---getAdjEmpSpaces :: [[Int]] -> (Int,Int) -> [(Int, Int)]
---getAdjEmpSpaces gBoard coords = getAdjacentSpaces gBoard coords []
-
---getAdjacentSpaces :: [[Int]] -> (Int, Int) -> [(Int, Int)] 
---getAdjacentSpaces gBoard coords = 
-
-{-
-whiteSpaceLoop :: [[Int]] -> (Int,Int) -> [(Int, Int)] -> [(Int, Int)]
-whiteSpaceLoop gBoard coords [] = []
-whiteSpaceLoop gBoard coords spaces = [(x,y) | (x,y) <- (getAdjCoordinates coords (length gBoard)), isWhiteSpot gBoard (x,y)]
+--Gets all coordinates for adjacent empty spaces
+getEmptyAdj :: [[Int]] -> (Int,Int) -> [(Int,Int)]
+getEmptyAdj board point = getAdjIfEmpty board [point] [(x,y) | (x,y) <- (getAdjCoords (length board) point), isEmptyTile board (x,y)]
 
 
-isWhiteSpot :: [[Int]] -> (Int,Int) -> Bool
-isWhiteSpot gBoard coords = (getElement gBoard coords) == 0
+getAdjIfEmpty :: [[Int]] -> [(Int,Int)] -> [(Int,Int)] -> [(Int, Int)]
+getAdjIfEmpty board results [] = results
+getAdjIfEmpty board results toCheck = do
+	--This list comprehension here gets all points adjacent to the coordinates in toCheck, if they are emptyTiles
+	let newResults = results ++ [(x,y) | (x,y) <- (toCheck), isEmptyTile board (x,y), not ((x,y) `elem` results)]
 
--}
+	--This list comprehension here gets all adjacent emptyTiles from toCheck, if they are not yet in the newResults
+	--'concat' does [[a]] -> [a] and 'nub' removes all duplicates from the list
+	let newToCheck = nub ([(x,y) | (x,y) <- (concat (map (getAdjCoords (length board)) toCheck)), isEmptyTile board (x,y), not((x,y) `elem` newResults)])
 
---Retorna apenas posições que não são bombas e que não estão contidas no array	
-emptyPlaces :: [[Int]] -> [(Int,Int)] -> [(Int,Int)]-> [(Int,Int)] 
-emptyPlaces matrix [] (y:ys) = []
-emptyPlaces matrix ((xCoord,yCoord):xs) (y:ys)
-    |(validPlace matrix (xCoord,yCoord) &&  not((xCoord,yCoord) `elem` (y:ys)))== True = (xCoord,yCoord):(emptyPlaces matrix xs (y:ys))
-    |otherwise = emptyPlaces matrix xs (y:ys)
-	
---Retorna as posições que serão abertas no array
-getPlace :: [[Int]] -> [(Int,Int)] -> [(Int,Int)] ->[(Int,Int)] 
-getPlace matrix [] results = results 
-getPlace matrix (coord:adjCoords) results
-    |(emptyPlace matrix coord) == True =  getPlace matrix (adjCoords++adjacent) (coord:results)
-    |otherwise = if validPlace matrix coord then getPlace matrix adjCoords (coord:results)
-             else getPlace matrix adjCoords results
-    where adjacent = emptyPlaces matrix (getAdjCoordinates coord (length matrix)) (results++adjCoords)	
+	--RecursiveStep
+	getAdjIfEmpty board newResults newToCheck
 
--- testa se a posição na matriz é uma emptyTile
-emptyPlace :: [[Int]] -> (Int,Int)-> Bool 
-emptyPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == 0
-	
-	
--- testa se a posição na matriz não é uma bomba 
-validPlace ::[[Int]] -> (Int,Int) -> Bool 
-validPlace matrix (xCoord,yCoord) = getElement matrix (xCoord,yCoord) == -1
+--Checks if coordinate leads to an EmptyTile
+isEmptyTile :: [[Int]] -> (Int,Int) -> Bool
+isEmptyTile board point = (getElement board point) == 0
 
 -- Game title
 getTitle :: IO ()
 getTitle = putStrLn "\n *** Minesweeper *** \n"
-			
+		
 main = do
 	
 	let amountBombs = getAmountBombs boardSize bombDensity
@@ -172,20 +151,18 @@ main = do
 
 	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
 
-	--putChar (getElement (editBoardAt iDisplay (3,5) bombTile) (3,5))
-
+	 
 	let testB = [[0,0,1,0,0,0,0,0,0],
-				 [0,1,0,0,0,0,0,0,0],
-				 [1,0,0,0,0,0,0,0,0],
- 				 [0,0,0,0,0,0,0,0,0],
+				 [0,0,1,0,0,0,0,0,0],
+				 [0,0,1,0,0,0,0,0,0],
+ 				 [1,1,1,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0]]
 
-	print (getPlace testB [(0,0)] [] )
 
-
+	print (getEmptyAdj testB (0,0))
 
 	putStrLn "Not Yet Implemented"
