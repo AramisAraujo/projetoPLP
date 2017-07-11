@@ -83,6 +83,21 @@ getAdjCoords boardSize (x,y) = validateCoordinates [upperLeft x y, up x y, upper
 		
 		lowerRight x y = (x+1,y+1)
 
+auxGetAdjCoordsList :: Int -> [(Int, Int)] -> [(Int, Int)] -- Get right adjacents coordinates of all coordinates on the first list
+auxGetAdjCoordsList boardSize (c:cs)
+	| length cs > 0 = getAdjCoords boardSize c ++ getAdjCoordsList boardSize cs
+	| otherwise = getAdjCoords boardSize c
+
+getAdjCoordsList :: Int -> [(Int, Int)] -> [(Int, Int)] -- Remove repeteaded elements of the auxGetAdjCoordsList list
+getAdjCoordsList boardSize coords = nub (auxGetAdjCoordsList boardSize coords)
+
+getHintCoords :: [(Int, Int)] -> [[Int]] -> [(Int, Int)] -- Get only 'hints' (element > 1) of the getAdjCoordsList
+getHintCoords [] gameBoard = []
+getHintCoords (c:cs) gameBoard
+	| (getElement gameBoard c) > 1 = c: getHintCoords cs gameBoard
+	| otherwise = getHintCoords cs gameBoard
+
+
 -- Evaluates valid coordinates from a list
 validateCoordinates :: [(Int,Int)] -> Int -> [(Int,Int)]
 validateCoordinates [] boardSize = []
@@ -152,7 +167,7 @@ main = do
 	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
 
 	 
-	let testB = [[0,0,1,0,0,0,0,0,0],
+	let testB = [[3,2,1,0,0,0,0,0,0],
 				 [0,0,1,0,0,0,0,0,0],
 				 [0,0,1,0,0,0,0,0,0],
  				 [1,1,1,0,0,0,0,0,0],
@@ -162,7 +177,14 @@ main = do
 				 [0,0,0,0,0,0,0,0,0],
 				 [0,0,0,0,0,0,0,0,0]]
 
+	let coords = [(0, 0), (1, 1), (0, 1)]
 
-	print (getEmptyAdj testB (0,0))
+	print (getElement testB (0, 0))
+
+	print (getHintCoords coords testB)
+
+	-- print (getEmptyAdj testB (0,0))
+
+
 
 	putStrLn "Not Yet Implemented"
