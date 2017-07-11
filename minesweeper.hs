@@ -2,6 +2,7 @@ import Data.List
 import System.IO
 import System.IO.Unsafe
 import System.Random
+import Data.Char
 
 --Game Tile Constants
 coveredTile = '■'
@@ -160,7 +161,14 @@ getMenu  = "Options\n  1. Open Tile\n  2. Flag/Unflag Tile\n  3. Exit Game\n\n C
 getUserOption :: String
 getUserOption = "Please type Row and Column coordinates to open a tile."
 
-
+openTiles :: [(Int, Int)] -> [[Int]] -> [[Char]]  -> [[Char]]
+openTiles [] board display = display
+openTiles (c:cs) board display
+	| getElement display c /= coveredTile = openTiles cs board display
+	| getElement board c == 0 = openTiles cs board (editBoardAt display c emptyTile)
+	| getElement board c > 0 = openTiles cs board (editBoardAt display c (intToDigit (getElement board c)))
+	| getElement board c == -1 = openTiles cs board (editBoardAt display c bombTile)
+	
 
 
 
