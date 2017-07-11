@@ -94,7 +94,7 @@ getAdjCoordsList boardSize coords = nub (auxGetAdjCoordsList boardSize coords)
 getHintCoords :: [(Int, Int)] -> [[Int]] -> [(Int, Int)] -- Get only 'hints' (element > 1) of the getAdjCoordsList
 getHintCoords [] gameBoard = []
 getHintCoords (c:cs) gameBoard
-	| (getElement gameBoard c) > 1 = c: getHintCoords cs gameBoard
+	| (getElement gameBoard c) > 0 = c: getHintCoords cs gameBoard
 	| otherwise = getHintCoords cs gameBoard
 
 
