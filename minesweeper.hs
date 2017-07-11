@@ -151,16 +151,36 @@ isEmptyTile board point = (getElement board point) == 0
 -- Game title
 getTitle :: IO ()
 getTitle = putStrLn "\n *** Minesweeper *** \n"
-		
+
+-- Menu Options
+getMenu :: String
+getMenu  = "Options\n  1. Open Tile\n  2. Flag/Unflag Tile\n  3. Exit Game\n\n Choose your Option: "
+
+-- Asking for coordinates
+getUserOption :: String
+getUserOption = "Please type Row and Column coordinates to open a tile."
+
+
+
+
+
+
+
+
 main = do
 	
 	let amountBombs = getAmountBombs boardSize bombDensity
 	let iGameboard = getInitialGameboard boardSize
 	let iDisplay = getInitialDisplay boardSize
 
+
 	printBoard iGameboard
 
 	printDisplay iDisplay
+
+	getTitle
+
+	putStrLn getMenu
 
 	putStrLn " "
 
