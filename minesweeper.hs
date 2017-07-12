@@ -183,6 +183,9 @@ openTiles (c:cs) board display
 	| getElement board c == 0 = openTiles cs board (editBoardAt display c emptyTile)
 	| getElement board c > 0 = openTiles cs board (editBoardAt display c (intToDigit (getElement board c)))
 	| getElement board c == -1 = openTiles cs board (editBoardAt display c bombTile)
+
+openAllTiles :: [[Int]] -> [[Char]]  -> [[Char]]
+openAllTiles board display = openTiles [(x, y) | x <- [0.. (length board)-1], y <- [0..(length board)-1]] board display
 	
 insertHints :: [[Int]] -> [(Int,Int)] ->[[Int]]
 --The list comprehension here evaluates to all coordinates around the bombs (excluding bombs themselves)
