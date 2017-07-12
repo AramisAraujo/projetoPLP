@@ -168,6 +168,9 @@ openTiles (c:cs) board display
 	| getElement board c == 0 = openTiles cs board (editBoardAt display c emptyTile)
 	| getElement board c > 0 = openTiles cs board (editBoardAt display c (intToDigit (getElement board c)))
 	| getElement board c == -1 = openTiles cs board (editBoardAt display c bombTile)
+
+openAllTiles :: [(Int, Int)] -> [[Int]] -> [[Char]]  -> [[Char]]
+openAllTiles coords board display = openTiles [(x, y) | x <- [0..8], y <- [0..8]] board display
 	
 
 insertHints :: [[Int]] -> [(Int,Int)] ->[[Int]]
