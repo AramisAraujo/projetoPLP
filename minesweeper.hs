@@ -11,7 +11,7 @@ flaggedTile = '🏴'
 bombTile = '💣'
 
 --Game Constants
-boardSize = 9 -- 9x9
+boardSize = 9 -- 9x9 board
 bombDensity = 0.1 -- 10% of the game board
 
 --Game Initial functions
@@ -170,8 +170,13 @@ openTiles (c:cs) board display
 	| getElement board c == -1 = openTiles cs board (editBoardAt display c bombTile)
 	
 
+insertHints :: [[Int]] -> [(Int,Int)] ->[[Int]]
+--The list comprehension here evaluates to all coordinates around the bombs (excluding bombs themselves)
+insertHints board bombCoords = insertRec board [(x,y) | (x,y) <- (concat(map (getAdjCoords (length board)) bombCoords)), not ((getElement board (x,y)) == -1)]
 
-
+	where insertRec :: [[Int]] -> [(Int,Int)] -> [[Int]] 
+		insertRec board [] = board
+		insertRec board (c:cs) = insertRec (editBoardAt board c ((getElement board c) + 1)) cs
 
 
 
