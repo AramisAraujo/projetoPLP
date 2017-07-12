@@ -1,8 +1,8 @@
 import Data.List
+import Data.Char
 import System.IO
 import System.IO.Unsafe
 import System.Random
-import Data.Char
 
 --Game Tile Constants
 coveredTile = '■'
@@ -30,16 +30,32 @@ printBoard gameBoard = do
 	sequence_ (map print gameBoard) --Sequence will execute the IO() commands that are in the mapping
 
 printDisplay :: [[Char]] -> IO()
-printDisplay displayBoard = do
-	sequence_ (map putStrLn (map formatLine displayBoard))--This external map creates ::[IO()]. Sequence executes those IO commands
+printDisplay display = do
+	let upperNums = formatNumGuide [0..((length display) - 1)]
+	--sequence_ (map putStrLn --This external map creates ::[IO()]. Sequence executes those IO commands
+	let formattedBoard = [("   " ++ upperNums)] ++ ["   " ++ (concat(replicate (length display) "  ▼"))] ++ formatBoard display
 
-formatLine :: String -> String
-formatLine line =  formatLineAux line (length line)
+	sequence_ (map putStrLn formattedBoard)
+
+	where
+		formatNumGuide [] = " "
+		formatNumGuide (n:ns)
+			|n <= 9 = "  " ++ (intToDigit n) : formatNumGuide ns
+			|otherwise = (intToDigit n) : formatNumGuide ns
+
+formatBoard :: [String] -> [String]
+formatBoard board =  formatBoardAux board (length board) 0
 
 	where 
-		formatLineAux :: String -> Int -> String
-		formatLineAux line 1 = line
-		formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
+		formatBoardAux :: [String] -> Int -> Int -> [String]
+		formatBoardAux lines 0 nLine = lines
+		formatBoardAux (x:xs) len nLine
+			|nLine <= 9 = ["  " ++ (intToDigit (nLine)) : "▶ "  ++ (formatLine x)] ++ formatBoardAux xs (length xs) (nLine + 1)
+			|otherwise = [(intToDigit (nLine)) : "▶ " ++ (formatLine x)] ++ formatBoardAux xs (length xs) (nLine + 1)
+
+formatLine :: String -> String
+formatLine [] = []
+formatLine (c:cs) = c : "  " ++ formatLine cs
 
 
 --List operation related functions
@@ -123,14 +139,13 @@ genRandomCoords amount bSize coords = do
 getRndTuple :: Int -> (Int,Int)
 getRndTuple threshold = (getRandomIntR(0,threshold), getRandomIntR(0,threshold))
 
---Generates a random Int from a range (not safe, may cause side effects)
+--Generates a random Int from a range
 getRandomIntR :: (Int,Int) -> Int
 getRandomIntR (x,y) = unsafePerformIO (randomRIO (x,y))
 
 --Gets all coordinates for adjacent empty spaces
 getEmptyAdj :: [[Int]] -> (Int,Int) -> [(Int,Int)]
 getEmptyAdj board point = getAdjIfEmpty board [point] [(x,y) | (x,y) <- (getAdjCoords (length board) point), isEmptyTile board (x,y)]
-
 
 getAdjIfEmpty :: [[Int]] -> [(Int,Int)] -> [(Int,Int)] -> [(Int, Int)]
 getAdjIfEmpty board results [] = results
@@ -169,10 +184,10 @@ openTiles (c:cs) board display
 	| getElement board c > 0 = openTiles cs board (editBoardAt display c (intToDigit (getElement board c)))
 	| getElement board c == -1 = openTiles cs board (editBoardAt display c bombTile)
 	
-
 insertHints :: [[Int]] -> [(Int,Int)] ->[[Int]]
 --The list comprehension here evaluates to all coordinates around the bombs (excluding bombs themselves)
-insertHints board bombCoords = insertRec board [(x,y) | (x,y) <- (concat(map (getAdjCoords (length board)) bombCoords)), not ((getElement board (x,y)) == -1)]
+insertHints board bombCoords = insertRec board [(x,y) | (x,y) <- (concat(map (getAdjCoords (length board)) bombCoords)),
+ not ((getElement board (x,y)) == -1)]
 
 	where 
 		insertRec board [] = board
