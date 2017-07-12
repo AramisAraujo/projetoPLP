@@ -174,7 +174,7 @@ insertHints :: [[Int]] -> [(Int,Int)] ->[[Int]]
 --The list comprehension here evaluates to all coordinates around the bombs (excluding bombs themselves)
 insertHints board bombCoords = insertRec board [(x,y) | (x,y) <- (concat(map (getAdjCoords (length board)) bombCoords)), not ((getElement board (x,y)) == -1)]
 
-	where insertRec :: [[Int]] -> [(Int,Int)] -> [[Int]] 
+	where 
 		insertRec board [] = board
 		insertRec board (c:cs) = insertRec (editBoardAt board c ((getElement board c) + 1)) cs
 
