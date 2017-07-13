@@ -29,7 +29,7 @@ printDisplay :: [[Char]] -> IO()
 --<<<<<<< HEAD
 printDisplay displayBoard = do
 	--sequence_ (map putStrLn (map formatLine displayBoard))This external map creates ::[IO()]. Sequence executes those IO commands
-	sequence_ (putStrLn (printableDisplay displayBoard))
+	sequence_ (map putStrLn (printableDisplay displayBoard))
 --=======
 --printDisplay display = do
 --	let upperNums = formatNumGuide [0..((length display) - 1)]
