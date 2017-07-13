@@ -32,7 +32,7 @@ printBoard gameBoard = do
 printDisplay :: [[Char]] -> IO()
 printDisplay displayBoard = do
 	--sequence_ (map putStrLn (map formatLine displayBoard))This external map creates ::[IO()]. Sequence executes those IO commands
-	sequence_ (printableDisplay displayBoard)
+	sequence_ (putStrLn (printableDisplay displayBoard))
 
 printableDisplay :: [[Char]] -> String
 printableDisplay displayBoard = upperDisplayBorder ++ (concat [(formatLine (displayBoard !! i)) ++ "\n" | i <- [0,1..(boardSize - 1)]])
