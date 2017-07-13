@@ -10,10 +10,6 @@ emptyTile = '□'
 flaggedTile = '🏴'
 bombTile = '💣'
 
---Game Constants
-boardSize = 9 -- 9x9 board
-bombDensity = 0.1 -- 10% of the game board
-
 --Game Initial functions
 getAmountBombs :: Int -> Float -> Int
 getAmountBombs boardSize bombDensity = round ( (fromIntegral boardSize) * bombDensity * 10) :: Int
@@ -30,9 +26,15 @@ printBoard gameBoard = do
 	sequence_ (map print gameBoard) --Sequence will execute the IO() commands that are in the mapping
 
 printDisplay :: [[Char]] -> IO()
+--<<<<<<< HEAD
 printDisplay displayBoard = do
 	--sequence_ (map putStrLn (map formatLine displayBoard))This external map creates ::[IO()]. Sequence executes those IO commands
 	sequence_ (putStrLn (printableDisplay displayBoard))
+--=======
+--printDisplay display = do
+--	let upperNums = formatNumGuide [0..((length display) - 1)]
+--	let formattedBoard = [("   " ++ upperNums)] ++ ["   " ++ (concat(replicate (length display) "  ▼"))] ++ formatBoard display
+-->>>>>>> master
 
 printableDisplay :: [[Char]] -> String
 printableDisplay displayBoard = upperDisplayBorder ++ (concat [(formatLine (displayBoard !! i)) ++ "\n" | i <- [0,1..(boardSize - 1)]])
@@ -92,19 +94,10 @@ getAdjCoords boardSize (x,y) = validateCoordinates [upperLeft x y, up x y, upper
 		
 		lowerRight x y = (x+1,y+1)
 
-auxGetAdjCoordsList :: Int -> [(Int, Int)] -> [(Int, Int)] -- Get right adjacents coordinates of all coordinates on the first list
-auxGetAdjCoordsList boardSize (c:cs)
-	| length cs > 0 = getAdjCoords boardSize c ++ getAdjCoordsList boardSize cs
-	| otherwise = getAdjCoords boardSize c
-
-getAdjCoordsList :: Int -> [(Int, Int)] -> [(Int, Int)] -- Remove repeteaded elements of the auxGetAdjCoordsList list
-getAdjCoordsList boardSize coords = nub (auxGetAdjCoordsList boardSize coords)
 
 getHintCoords :: [(Int, Int)] -> [[Int]] -> [(Int, Int)] -- Get only 'hints' (element > 1) of the getAdjCoordsList
-getHintCoords [] gameBoard = []
-getHintCoords (c:cs) gameBoard
-	| (getElement gameBoard c) > 0 = c: getHintCoords cs gameBoard
-	| otherwise = getHintCoords cs gameBoard
+getHintCoords [] gBoard = []
+getHintCoords (c:cs) gBoard = [(x,y) | (x,y) <- (getAdjCoords (length gBoard) c), getElement gBoard (x,y) > 0] ++ getHintCoords cs gBoard
 
 
 -- Evaluates valid coordinates from a list
@@ -156,17 +149,26 @@ getAdjIfEmpty board results toCheck = do
 isEmptyTile :: [[Int]] -> (Int,Int) -> Bool
 isEmptyTile board point = (getElement board point) == 0
 
+coordsAreValid :: [(Int,Int)] -> Int-> Bool
+coordsAreValid coords boardSize = (length (validateCoordinates coords boardSize)) > 0
+
 -- Game title
-getTitle :: IO ()
-getTitle = putStrLn "\n *** Minesweeper *** \n"
+getTitle :: String
+getTitle = "\n *** Minesweeper *** \n"
 
 -- Menu Options
 getMenu :: String
 getMenu  = "Options\n  1. Open Tile\n  2. Flag/Unflag Tile\n  3. Exit Game\n\n Choose your Option: "
 
 -- Asking for coordinates
-getUserOption :: String
-getUserOption = "Please type Row and Column coordinates to open a tile."
+askForCoords :: String
+askForCoords = "Please type Row and Column coordinates to open a tile: "
+
+gameover :: Int -> String
+gameover points = "\nO jogo acabou! Você marcou " ++ (show points) ++ " pontos."
+
+getCoordFromList :: [Int] -> (Int,Int)
+getCoordFromList list = ((list !! 0), (list !! 1))
 
 openTiles :: [(Int, Int)] -> [[Int]] -> [[Char]]  -> [[Char]]
 openTiles [] board display = display
@@ -188,46 +190,89 @@ insertHints board bombCoords = insertRec board [(x,y) | (x,y) <- (concat(map (ge
 		insertRec board [] = board
 		insertRec board (c:cs) = insertRec (editBoardAt board c ((getElement board c) + 1)) cs
 
+insertBombs :: [[Int]] -> [(Int,Int)] -> [[Int]]
+insertBombs gBoard [] = gBoard
+insertBombs gBoard (c:cs) = insertBombs (editBoardAt gBoard c (-1)) cs
+
+
+--gameBoard display remainingFlags points 
+start :: [[Int]] -> [[Char]] -> Int -> Int -> IO()
+start gBoard display flags points = do
+
+	putStrLn getTitle
+	putStrLn getMenu
+	putStrLn (" Pontuação Atual: " ++ show points ++ "\n")
+
+
+
+	printDisplay display
+
+	option' <- getLine
+
+	let option = read option' :: Int
+
+	if option == 1 then do --Open a tile
+			putStrLn askForCoords
+			input <- getLine
+
+			let coords = getCoordFromList (map read $ words input :: [Int])
+
+			if coordsAreValid [coords] (length gBoard) && (getElement display coords) /= flaggedTile then --if the coords are valid and are not flagged
+				if getElement gBoard coords == -1 then putStrLn (gameover points) -- if the coords lead to a bomb, it's game over
+				else if getElement gBoard coords == 0 then do --if the coords lead to an empty space
+
+					let coordsToOpen = coords : getEmptyAdj gBoard coords
+					let hints = nub (getHintCoords coordsToOpen gBoard)
+					let newScore = length (coordsToOpen)
+
+					start gBoard (openTiles (coordsToOpen ++ hints) gBoard display) flags (points + newScore)
+
+				else start gBoard (openTiles [coords] gBoard display) flags (points + 1) --The coords lead to a hint
+
+			else do --Invalid/Flagged coordinates
+				putStrLn "Invalid coordinates! The tile is flagged or could not be found."
+				start gBoard display flags points
+
+
+	else if option == 2 then do --Flag/Unflag a tile
+
+		putStrLn askForCoords
+		input <- getLine
+
+		let coords = getCoordFromList (map read $ words input :: [Int])
+
+
+		if flags > 0 && coordsAreValid [coords] (length gBoard) && getElement display coords == coveredTile then --Flags are available, coordinates are valid and lead to a covered tile
+			start gBoard (editBoardAt display coords flaggedTile) (flags - 1) points
+
+		else if coordsAreValid [coords] (length gBoard) && getElement display coords == flaggedTile then --Unflag a tile
+			start gBoard (editBoardAt display coords coveredTile) (flags + 1) points
+
+		else start gBoard display flags points --Nothing happens
+
+
+	else if option == 3 then putStrLn (gameover points)
+
+	else do --not a valid option
+		putStrLn "That was not a valid option!"
+		start gBoard display flags points
 
 
 main = do
 	
+	--Game Constants
+	let boardSize = 9 -- 9x9 board
+	let bombDensity = 0.1 -- 10% of the game board
+
 	let amountBombs = getAmountBombs boardSize bombDensity
-	let iGameboard = getInitialGameboard boardSize
+	let amountFlags = amountBombs --A flag for each bomb
+	let iPoints = 0
+
+	let bombCoords = getRandomCoords amountBombs (boardSize)
+
+	let iGameboard = insertHints (insertBombs (getInitialGameboard boardSize) bombCoords) bombCoords --Insert bombs then their hints in the board
 	let iDisplay = getInitialDisplay boardSize
+	
 
 
-	printBoard iGameboard
-
-	printDisplay iDisplay
-
-	getTitle
-
-	putStrLn getMenu
-
-	putStrLn " "
-
-	printDisplay (editBoardAt iDisplay (3,5) emptyTile)
-
-	 
-	let testB = [[3,2,1,0,0,0,0,0,0],
-				 [0,0,1,0,0,0,0,0,0],
-				 [0,0,1,0,0,0,0,0,0],
- 				 [1,1,1,0,0,0,0,0,0],
-				 [0,0,0,0,0,0,0,0,0],
-				 [0,0,0,0,0,0,0,0,0],
-				 [0,0,0,0,0,0,0,0,0],
-				 [0,0,0,0,0,0,0,0,0],
-				 [0,0,0,0,0,0,0,0,0]]
-
-	let coords = [(0, 0), (1, 1), (0, 1)]
-
-	print (getElement testB (0, 0))
-
-	print (getHintCoords coords testB)
-
-	-- print (getEmptyAdj testB (0,0))
-
-
-
-	putStrLn "Not Yet Implemented"
+	start iGameboard iDisplay amountFlags iPoints
