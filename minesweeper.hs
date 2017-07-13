@@ -1,4 +1,5 @@
 import Data.List
+import qualified Data.Set as Set
 import Data.Char
 import System.IO
 import System.IO.Unsafe
@@ -140,8 +141,8 @@ getAdjIfEmpty board results toCheck = do
 	let newResults = results ++ [(x,y) | (x,y) <- (toCheck), isEmptyTile board (x,y), not ((x,y) `elem` results)]
 
 	--This list comprehension here gets all adjacent emptyTiles from toCheck, if they are not yet in the newResults
-	--'concat' does [[a]] -> [a] and 'nub' removes all duplicates from the list
-	let newToCheck = nub ([(x,y) | (x,y) <- (concat (map (getAdjCoords (length board)) toCheck)), isEmptyTile board (x,y), not((x,y) `elem` newResults)])
+	--'concat' does [[a]] -> [a] and 'delDups' removes all duplicates from the list
+	let newToCheck = delDups ([(x,y) | (x,y) <- (concat (map (getAdjCoords (length board)) toCheck)), isEmptyTile board (x,y), not((x,y) `elem` newResults)])
 
 	--RecursiveStep
 	getAdjIfEmpty board newResults newToCheck
@@ -162,11 +163,17 @@ getMenu :: String
 getMenu  = "Options\n  1. Open Tile\n  2. Flag/Unflag Tile\n  3. Exit Game\n\n Choose your Option: "
 
 -- Asking for coordinates
-askForCoords :: String
-askForCoords = "Please type Row and Column coordinates to open a tile: "
+askForCoordsOpen :: String
+askForCoordsOpen = "Please type Row and Column coordinates to open a tile: "
 
-gameover :: Int -> String
-gameover points = "\nO jogo acabou! Você marcou " ++ (show points) ++ " pontos."
+askForCoordsFlag :: String
+askForCoordsFlag = "Please type Row and Column coordinates to Flag/Unflag a tile: "
+
+gameover :: Int -> [[Int]] -> [[Char]] -> IO()
+gameover points gBoard display = do
+	let revealedDisplay = openAllTiles gBoard display
+	printDisplay revealedDisplay
+	putStrLn ("\nGame Over! You achieved " ++ (show points) ++ " point(s)!")
 
 getCoordFromList :: [Int] -> (Int,Int)
 getCoordFromList list = ((list !! 0), (list !! 1))
@@ -195,68 +202,74 @@ insertBombs :: [[Int]] -> [(Int,Int)] -> [[Int]]
 insertBombs gBoard [] = gBoard
 insertBombs gBoard (c:cs) = insertBombs (editBoardAt gBoard c (-1)) cs
 
-
---gameBoard display remainingFlags points 
-start :: [[Int]] -> [[Char]] -> Int -> Int -> IO()
-start gBoard display flags points = do
-
-	putStrLn getTitle
-	putStrLn getMenu
-	putStrLn (" Pontuação Atual: " ++ show points ++ "\n")
+delDups :: Ord a => [a] -> [a]
+delDups = Set.toList . Set.fromList
 
 
+start :: [[Int]] -> [[Char]] -> Int -> Int -> Int-> IO()
+start gBoard display flags points tilesLeft = do
 
-	printDisplay display
+	if tilesLeft == 0 then gameover points gBoard display
 
-	option' <- getLine
+	else do
+		putStrLn getTitle
+		
+		putStrLn (" Points: " ++ show points)
+		putStrLn (" Remaining Flags: " ++ show flags ++ flaggedTile : "\n")	
+	
 
-	let option = read option' :: Int
+		printDisplay display	
 
-	if option == 1 then do --Open a tile
-			putStrLn askForCoords
-			input <- getLine
+		putStrLn ("\n" ++ getMenu)	
 
-			let coords = getCoordFromList (map read $ words input :: [Int])
+		option' <- getLine	
 
-			if coordsAreValid [coords] (length gBoard) && (getElement display coords) /= flaggedTile then --if the coords are valid and are not flagged
-				if getElement gBoard coords == -1 then putStrLn (gameover points) -- if the coords lead to a bomb, it's game over
-				else if getElement gBoard coords == 0 then do --if the coords lead to an empty space
+		let option = read option' :: Int	
 
-					let coordsToOpen = coords : getEmptyAdj gBoard coords
-					let hints = nub (getHintCoords coordsToOpen gBoard)
-					let newScore = length (coordsToOpen)
+		if option == 1 then do --Open a tile
+				putStrLn askForCoordsOpen
+				input <- getLine	
 
-					start gBoard (openTiles (coordsToOpen ++ hints) gBoard display) flags (points + newScore)
+				let coords = getCoordFromList (map read $ words input :: [Int])	
 
-				else start gBoard (openTiles [coords] gBoard display) flags (points + 1) --The coords lead to a hint
+				if coordsAreValid [coords] (length gBoard) && (getElement display coords) /= flaggedTile then --If the coords are valid and are not flagged
+					if getElement gBoard coords == -1 then gameover points gBoard display -- If the coords lead to a bomb, it's game over
+					else do --In this case the coords lead to an empty space or a hint tile	
 
-			else do --Invalid/Flagged coordinates
-				putStrLn "Invalid coordinates! The tile is flagged or could not be found."
-				start gBoard display flags points
+						let coordsToOpen = coords : getEmptyAdj gBoard coords
+						let hints = delDups (getHintCoords coordsToOpen gBoard)
+						let newScore = length (coordsToOpen)
+						let remainingTiles = length (coordsToOpen ++ hints)	
 
+						start gBoard (openTiles (coordsToOpen ++ hints) gBoard display) flags (points + newScore) remainingTiles	
 
-	else if option == 2 then do --Flag/Unflag a tile
+				else do --Invalid/Flagged coordinates
+					putStrLn "Invalid coordinates! The tile is flagged or could not be found."
+					start gBoard display flags points tilesLeft	
+	
 
-		putStrLn askForCoords
-		input <- getLine
+		else if option == 2 then do --Flag/Unflag a tile	
 
-		let coords = getCoordFromList (map read $ words input :: [Int])
+			putStrLn askForCoordsFlag
+			input <- getLine	
 
+			let coords = getCoordFromList (map read $ words input :: [Int])	
+	
 
-		if flags > 0 && coordsAreValid [coords] (length gBoard) && getElement display coords == coveredTile then --Flags are available, coordinates are valid and lead to a covered tile
-			start gBoard (editBoardAt display coords flaggedTile) (flags - 1) points
+			if flags > 0 && coordsAreValid [coords] (length gBoard) && getElement display coords == coveredTile then --Flags are available, coordinates are valid and lead to a covered tile
+				start gBoard (editBoardAt display coords flaggedTile) (flags - 1) points (tilesLeft - 1)	
 
-		else if coordsAreValid [coords] (length gBoard) && getElement display coords == flaggedTile then --Unflag a tile
-			start gBoard (editBoardAt display coords coveredTile) (flags + 1) points
+			else if coordsAreValid [coords] (length gBoard) && getElement display coords == flaggedTile then --Unflag a tile
+				start gBoard (editBoardAt display coords coveredTile) (flags + 1) points (tilesLeft + 1)	
 
-		else start gBoard display flags points --Nothing happens
+			else start gBoard display flags points tilesLeft --Nothing happens, proceed with the game	
+	
 
+		else if option == 3 then gameover points gBoard display	
 
-	else if option == 3 then putStrLn (gameover points)
-
-	else do --not a valid option
-		putStrLn "That was not a valid option!"
-		start gBoard display flags points
+		else do --Not a valid option
+			putStrLn "That was not a valid option!"
+			start gBoard display flags points tilesLeft
 
 
 main = do
@@ -273,7 +286,8 @@ main = do
 
 	let iGameboard = insertHints (insertBombs (getInitialGameboard boardSize) bombCoords) bombCoords --Insert bombs then their hints in the board
 	let iDisplay = getInitialDisplay boardSize
+
+	let iRemainingTiles = (boardSize * boardSize) - amountBombs
 	
 
-
-	start iGameboard iDisplay amountFlags iPoints
+	start iGameboard iDisplay amountFlags iPoints iRemainingTiles
