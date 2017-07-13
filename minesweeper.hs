@@ -37,13 +37,13 @@ printDisplay displayBoard = do
 -->>>>>>> master
 
 printableDisplay :: [[Char]] -> String
-printableDisplay displayBoard = upperDisplayBorder ++ (concat [(formatLine (displayBoard !! i)) ++ "\n" | i <- [0,1..(boardSize - 1)]])
+printableDisplay displayBoard = upperDisplayBorder (length displayBoard) ++ (concat [(formatLine (displayBoard !! i) (length displayBoard)) ++ "\n" | i <- [0,1..((length displayBoard) - 1)]])
 
-upperDisplayBorder :: String
-upperDisplayBorder = ("   " ++ (concat ['▼' ++ "  " | i <- [0,1..(boardSize - 1)]]) ++ "\n")
+upperDisplayBorder :: Int -> String
+upperDisplayBorder displaySize = ("   " ++ (concat ['▼' ++ "  " | i <- [0,1..(displaySize - 1)]]) ++ "\n")
 
-formatLine :: String -> String
-formatLine line =  formatLineAux line (length line)
+formatLine :: String -> Int -> String
+formatLine line boardSize =  formatLineAux line (length line)
 
 	where 
 		formatLineAux :: String -> Int -> String
