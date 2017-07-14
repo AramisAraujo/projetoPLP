@@ -27,31 +27,30 @@ printBoard gameBoard = do
 	sequence_ (map print gameBoard) --Sequence will execute the IO() commands that are in the mapping
 
 printDisplay :: [[Char]] -> IO()
-printDisplay display = do
-	let upperNums = formatNumGuide [0..((length display) - 1)]
-	let formattedBoard = [("   " ++ upperNums)] ++ ["   " ++ (concat(replicate (length display) "  ▼"))] ++ formatBoard display
+--<<<<<<< HEAD
+printDisplay displayBoard = do
+	--sequence_ (map putStrLn (map formatLine displayBoard))This external map creates ::[IO()]. Sequence executes those IO commands
+	sequence_ (map putStrLn (printableDisplay displayBoard))
+--=======
+--printDisplay display = do
+--	let upperNums = formatNumGuide [0..((length display) - 1)]
+--	let formattedBoard = [("   " ++ upperNums)] ++ ["   " ++ (concat(replicate (length display) "  ▼"))] ++ formatBoard display
+-->>>>>>> master
 
-	sequence_ (map putStrLn formattedBoard)
+printableDisplay :: [[Char]] -> String
+printableDisplay displayBoard = upperDisplayBorder (length displayBoard) ++ (concat [(formatLine (displayBoard !! i) (length displayBoard)) ++ "\n" | i <- [0,1..((length displayBoard) - 1)]])
 
-	where
-		formatNumGuide [] = " "
-		formatNumGuide (n:ns)
-			|n <= 9 = "  " ++ (intToDigit n) : formatNumGuide ns
-			|otherwise = (intToDigit n) : formatNumGuide ns
+upperDisplayBorder :: Int -> String
+upperDisplayBorder displaySize = ("   " ++ (concat ['▼' ++ "  " | i <- [0,1..(displaySize - 1)]]) ++ "\n")
 
-formatBoard :: [String] -> [String]
-formatBoard board =  formatBoardAux board (length board) 0
+formatLine :: String -> Int -> String
+formatLine line boardSize =  formatLineAux line (length line)
 
 	where 
-		formatBoardAux :: [String] -> Int -> Int -> [String]
-		formatBoardAux lines 0 nLine = lines
-		formatBoardAux (x:xs) len nLine
-			|nLine <= 9 = ["  " ++ (intToDigit (nLine)) : "▶ "  ++ (formatLine x)] ++ formatBoardAux xs (length xs) (nLine + 1)
-			|otherwise = [(intToDigit (nLine)) : "▶ " ++ (formatLine x)] ++ formatBoardAux xs (length xs) (nLine + 1)
-
-formatLine :: String -> String
-formatLine [] = []
-formatLine (c:cs) = c : "  " ++ formatLine cs
+		formatLineAux :: String -> Int -> String
+		formatLineAux line 1 = line
+		formatLineAux (x:xs) boardSize ="►  " ++ ((x : "  ") ++ formatLineAux xs (length xs))
+		formatLineAux (x:xs) len = (x : "  ") ++ formatLineAux xs (length xs)
 
 
 --List operation related functions
