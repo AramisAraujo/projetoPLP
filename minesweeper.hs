@@ -216,6 +216,7 @@ start gBoard display flags points tilesLeft = do
 		
 		putStrLn (" Points: " ++ show points)
 		putStrLn (" Remaining Flags: " ++ show flags ++ flaggedTile : "\n")	
+		putStrLn (" Remaining Tiles: " ++ show tilesLeft)
 	
 
 		printDisplay display	
@@ -238,8 +239,8 @@ start gBoard display flags points tilesLeft = do
 
 						let coordsToOpen = coords : getEmptyAdj gBoard coords
 						let hints = delDups (getHintCoords coordsToOpen gBoard)
-						let newScore = length (coordsToOpen)
-						let remainingTiles = length (coordsToOpen ++ hints)	
+						let newScore = length (coordsToOpen ++ hints)
+						let remainingTiles = tilesLeft - (length (coordsToOpen ++ hints))	
 
 						start gBoard (openTiles (coordsToOpen ++ hints) gBoard display) flags (points + newScore) remainingTiles	
 
@@ -257,10 +258,10 @@ start gBoard display flags points tilesLeft = do
 	
 
 			if flags > 0 && coordsAreValid [coords] (length gBoard) && getElement display coords == coveredTile then --Flags are available, coordinates are valid and lead to a covered tile
-				start gBoard (editBoardAt display coords flaggedTile) (flags - 1) points (tilesLeft - 1)	
+				start gBoard (editBoardAt display coords flaggedTile) (flags - 1) points tilesLeft
 
 			else if coordsAreValid [coords] (length gBoard) && getElement display coords == flaggedTile then --Unflag a tile
-				start gBoard (editBoardAt display coords coveredTile) (flags + 1) points (tilesLeft + 1)	
+				start gBoard (editBoardAt display coords coveredTile) (flags + 1) points tilesLeft
 
 			else start gBoard display flags points tilesLeft --Nothing happens, proceed with the game	
 	
