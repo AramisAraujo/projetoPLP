@@ -1,10 +1,48 @@
 :- initialization(main).
-main :- write('Hello World!').
+
+% Game Board Tiles
+
+coveredTile('■').
+bombTile('💣').
+emptyTile('□').
+flaggedTile('🏴').
+
+emptyTileN(0).
+bombTileN(-1).
 
 
-coverTile(Result) :- Result is "A".
-bombTile(Result) :- Result is "B".
-nullTile(Result) :- Result is "C".
+%Game and Display board definition
+gameBoard(Board, Size):- length(Board,Size), length(Row,Size),
+ maplist( =(0), Row),  maplist( =(Row), Board).
+
+displayBoard(Display, Size):- length(Display, Size), length(Row, Size),
+coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
+
+
+%Board printing
+printBoard(Board):- length(Board, Length), printAux(Board, 1, 1, Length).
+
+printAux(Board, Limit, Limit, Limit):- nth1(Limit, Board, Row), nth1(Limit, Row, Elem),
+ write(Elem), nl, !.
+
+printAux(Board, Limit, Ycoord, Limit):- nth1(Limit, Board, Row), nth1(Ycoord, Row, Elem),
+ write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 1, NextColumn, Limit).
+
+printAux(Board, Xcoord, Ycoord, Limit):- nth1(Limit, Board, Row), nth1(Ycoord, Row, Elem),
+ write(Elem), write(' '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
+
+
+%Board Operations
+getElement([H|_], 0, Element):- Element is H.
+getElement([_|T], Pos, Element) :-  Z is Pos - 1, getElement(T, Z, Element).
+
+
+
+
+
+
+
+/**----Não consegui compreender ou fazer funcionar :c----
 
 tileHasOpen(Result) :- Result is [H|T].
 tileIsBomb(Result) :- Result is [H|T].
@@ -29,3 +67,14 @@ printingTile(X, Y, Result) :- member((X, Y), tileHasOpen(A)), member((X, Y), til
 
 printingTile(X, Y, Result) :- Result is coverTile(R).
 
+**/
+
+
+
+
+
+main :- 
+
+displayBoard(Board, 9),
+printBoard(Board),nl,
+halt(0).
