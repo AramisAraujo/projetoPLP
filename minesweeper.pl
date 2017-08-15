@@ -44,6 +44,8 @@ setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Xcoord - 1, setElemAt(T,
 setEleAux([_|T], Elem, 0, [Elem|T]).
 setEleAux([H|T], Elem, Pos, [H|NT]):- Z is Pos - 1, setEleAux(T, Elem, Z, NT).
 
+generateMine(Limit, Coord):- random_between(0,Limit,Xm), random_between(0,Limit,Ym), Coord = (Xm, Ym).
+
 
 /**----Não consegui compreender ou fazer funcionar :c----
 
