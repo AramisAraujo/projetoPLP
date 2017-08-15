@@ -37,8 +37,8 @@ getElement([H|_], 0, H).
 getElement([_|T], Pos, Element) :-  Z is Pos - 1, getElement(T, Z, Element).
 
 
-setElemAt([H|T], (0, Ycoord), Elem, [NewRow|T]):- setEleAux(H, Elem, Ycoord, NewRow).
-setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Xcoord - 1, setElemAt(T,(Z, Ycoord), Elem, NT).
+setElemAt([H|T], (Xcoord, 0), Elem, [NewRow|T]):- setEleAux(H, Elem, Xcoord, NewRow).
+setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Ycoord - 1, setElemAt(T,(Xcoord, Z), Elem, NT).
 
 
 setEleAux([_|T], Elem, 0, [Elem|T]).
@@ -58,7 +58,7 @@ filterCoordinates([X|XS], Limit, [X|ZS]):- checkCoordinate(X, Limit),!, filterCo
 filterCoordinates([_|XS], Limit, ZS):- filterCoordinates(XS, Limit, ZS).
 
 getAdjacentCoords((X, Y), Limit, AdjacentCoords):- 
-	 Coords = [(A, Y), (B, Y), (X, C), (X, D), (A, C), (A, D), (B, C), (B, D)], A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
+	 Coords = [(A, Y), (B, Y), (X, C), (X, D)], A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
 	 filterCoordinates(Coords, Limit, AdjacentCoords).
 
 
