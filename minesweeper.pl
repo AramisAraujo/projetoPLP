@@ -46,7 +46,12 @@ setEleAux([H|T], Elem, Pos, [H|NT]):- Z is Pos - 1, setEleAux(T, Elem, Z, NT).
 
 generateMine(Limit, Coord):- random_between(0,Limit,Xm), random_between(0,Limit,Ym), Coord = (Xm, Ym).
 
+getMines(BoardLimit, Amount, Answer):- length(Mines, Amount), 
+    maplist(generateMine(BoardLimit), Mines),  sort(Mines, Answer).
 
+
+    
+    
 /**----Não consegui compreender ou fazer funcionar :c----
 
 tileHasOpen(Result) :- Result is [H|T].
@@ -75,11 +80,11 @@ printingTile(X, Y, Result) :- Result is coverTile(R).
 **/
 
 
-
-
-
 main :- 
 displayBoard(Camp, 9),
 setElemAt(Camp, (4, 2), 'V', Answ),
-printBoard(Answ), nl, nl.
+printBoard(Answ), nl, nl,
+getMines(9, 9, Answer),
+write(Answer).
+
 %halt(0).
