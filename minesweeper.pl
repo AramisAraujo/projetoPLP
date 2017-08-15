@@ -49,8 +49,15 @@ generateMine(Limit, Coord):- random_between(0,Limit,Xm), random_between(0,Limit,
 getMines(BoardLimit, Amount, Answer):- length(Mines, Amount), 
     maplist(generateMine(BoardLimit), Mines),  sort(Mines, Answer).
 
+checkCoordinate((X, Y), Limit):- X @=< Limit, X @>= 0, Y @=< Limit, Y @>= 0.
 
-    
+filterCoordinates([], Limit, []).
+
+filterCoordinates([X|XS], Limit, [X|ZS]):- checkCoordinate(X, Limit),!, filterCoordinates(XS, Limit, ZS).
+
+filterCoordinates([_|XS], Limit, ZS):- filterCoordinates(XS, Limit, ZS).
+
+
     
 /**----Não consegui compreender ou fazer funcionar :c----
 
@@ -85,6 +92,9 @@ displayBoard(Camp, 9),
 setElemAt(Camp, (4, 2), 'V', Answ),
 printBoard(Answ), nl, nl,
 getMines(9, 9, Answer),
+filterCoordinates([(1, 3), (4, 5), (12, 9)], 9, ValidCoords),
+write(ValidCoords),nl,
 write(Answer).
+
 
 %halt(0).
