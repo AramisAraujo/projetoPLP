@@ -57,6 +57,11 @@ filterCoordinates([X|XS], Limit, [X|ZS]):- checkCoordinate(X, Limit),!, filterCo
 
 filterCoordinates([_|XS], Limit, ZS):- filterCoordinates(XS, Limit, ZS).
 
+getAdjacentCoords((X, Y), Limit, AdjacentCoords):- 
+	 Coords = [(A, Y), (B, Y), (X, C), (X, D)], A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
+	 filterCoordinates(Coords, Limit, AdjacentCoords).
+
+
 
     
 /**----Não consegui compreender ou fazer funcionar :c----
