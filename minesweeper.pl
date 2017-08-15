@@ -20,26 +20,29 @@ coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
 
 
 %Board printing
-printBoard(Board):- length(Board, Length), printAux(Board, 1, 1, Length).
+printBoard(Board):- length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
 
-printAux(Board, Limit, Limit, Limit):- nth1(Limit, Board, Row), nth1(Limit, Row, Elem),
- write(Elem), nl, !.
+printAux(Board, Limit, Limit, Limit):- getElement(Board, Limit, Row), getElement(Row, Limit, Elem),
+ write(Elem), nl.
 
-printAux(Board, Limit, Ycoord, Limit):- nth1(Limit, Board, Row), nth1(Ycoord, Row, Elem),
- write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 1, NextColumn, Limit).
+printAux(Board, Limit, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Limit, Elem),
+ write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 0, NextColumn, Limit).
 
-printAux(Board, Xcoord, Ycoord, Limit):- nth1(Limit, Board, Row), nth1(Ycoord, Row, Elem),
+printAux(Board, Xcoord, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Xcoord, Elem),
  write(Elem), write(' '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
 
 
 %Board Operations
-getElement([H|_], 0, Element):- Element is H.
+getElement([H|_], 0, H).
 getElement([_|T], Pos, Element) :-  Z is Pos - 1, getElement(T, Z, Element).
 
 
+setElemAt([H|T], (0, Ycoord), Elem, [NewRow|T]):- setEleAux(H, Elem, Ycoord, NewRow).
+setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Xcoord - 1, setElemAt(T,(Z, Ycoord), Elem, NT).
 
 
-
+setEleAux([_|T], Elem, 0, [Elem|T]).
+setEleAux([H|T], Elem, Pos, [H|NT]):- Z is Pos - 1, setEleAux(T, Elem, Z, NT).
 
 
 /**----Não consegui compreender ou fazer funcionar :c----
@@ -74,7 +77,7 @@ printingTile(X, Y, Result) :- Result is coverTile(R).
 
 
 main :- 
-
-displayBoard(Board, 9),
-printBoard(Board),nl,
-halt(0).
+displayBoard(Camp, 9),
+setElemAt(Camp, (4, 2), 'V', Answ),
+printBoard(Answ), nl, nl.
+%halt(0).
