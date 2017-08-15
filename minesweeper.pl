@@ -2,12 +2,29 @@
 
 % Game Board Tiles
 
-coveredTile('■').
-bombTile('💣').
-emptyTile('□').
-flaggedTile('🏴').
+coveredTile('A').
+bombTile('B').
+emptyTile('C').
+flaggedTile('D').
 
-emptyTileN(0).
+itsATileBomb(01).
+itsATileBomb(11).
+itsATileBomb(21).
+
+itsATileEmpty(00).
+itsATileEmpty(10).
+itsATileEmpty(20).
+
+itsATileCovered(01).
+itsATileCovered(00).
+
+itsATileFlagged(20).
+itsATileFlagged(21).
+
+itsATileOpened(11).
+itsATileOpened(10).
+
+/**emptyTileN(0).
 bombTileN(-1).
 
 
@@ -17,18 +34,35 @@ gameBoard(Board, Size):- length(Board,Size), length(Row,Size),
 
 displayBoard(Display, Size):- length(Display, Size), length(Row, Size),
 coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
+**/
+
+% ----------------- Definicao da funcao que imprime os caracteres ----------------------------------
+printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
+ itsATileOpened(Elem), itsATileBomb(Elem), bombTile(R), Result = (R).
+
+% Defines a empty tile, with yours bombs tips
+printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
+ itsATileOpened(Elem), itsATileEmpty(Elem), emptyTile1(Xcoord, Ycoord, Board, 0, R), Result = R.
+
+printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
+ itsATileCovered(Elem), coveredTile(R), Result = R.
+
+printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
+ itsATileFlagged(Elem), flaggedTile(R), Result = R.
+
+% ----------------- Fim da definicao da funcao que imprime os caracteres ----------------------------------
 
 
 %Board printing
 printBoard(Board):- length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
 
-printAux(Board, Limit, Limit, Limit):- getElement(Board, Limit, Row), getElement(Row, Limit, Elem),
+printAux(Board, Limit, Limit, Limit):- printingTile(Limit, Limit, Board, Elem),
  write(Elem), nl.
 
-printAux(Board, Limit, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Limit, Elem),
+printAux(Board, Limit, Ycoord, Limit):- printingTile(Limit, Ycoord, Board, Elem),
  write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 0, NextColumn, Limit).
 
-printAux(Board, Xcoord, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Xcoord, Elem),
+printAux(Board, Xcoord, Ycoord, Limit):- printingTile(Xcoord, Ycoord, Board, Elem),
  write(Elem), write(' '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
 
 
@@ -62,7 +96,14 @@ getAdjacentCoords((X, Y), Limit, AdjacentCoords):-
 	 filterCoordinates(Coords, Limit, AdjacentCoords).
 
 
+% -------------Definicao dos casos de abertura de uma casa------------------------------------------
+openTile([H|T], (Xcoord, Ycoord), [H|NT]):- getElement([H|T], Ycoord, Row), getElement(Row, Xcoord, Elem), 
+ itsATileCovered(Elem), itsATileBomb(Elem), YNcoord is 8 - Ycoord, setElemAt([H|T], (Xcoord, YNcoord), 11, [H|NT]).
 
+openTile([H|T], (Xcoord, Ycoord), [H|NT]):- getElement([H|T], Ycoord, Row), getElement(Row, Xcoord, Elem), 
+ itsATileCovered(Elem), itsATileEmpty(Elem), YNcoord is 8 - Ycoord, setElemAt([H|T], (Xcoord, YNcoord), 10, [H|NT]).
+
+% -------------Fim da definicao dos casos de abertura de uma casa------------------------------------------
     
 /**----Não consegui compreender ou fazer funcionar :c----
 
@@ -91,10 +132,14 @@ printingTile(X, Y, Result) :- Result is coverTile(R).
 
 **/
 
+% test functions
+fullCoveredBombsBoard(Display, Size):- length(Display, Size), length(Row, Size),
+ maplist( =(01), Row), maplist( =(Row), Display).
 
 main :- 
-displayBoard(Camp, 9),
-setElemAt(Camp, (4, 2), 'V', Answ),
+fullCoveredBombsBoard(Camp, 9),
+/**setElemAt(Camp, (4, 2), 'V', Answ),**/
+openTile(Camp, (4, 2), Answ),
 printBoard(Answ), nl, nl,
 getMines(9, 9, Answer),
 filterCoordinates([(1, 3), (4, 5), (12, 9)], 9, ValidCoords),
