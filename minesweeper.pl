@@ -70,8 +70,7 @@ Answer = Ts, filterEmptyTiles(T, GBoard, Ts).
 
 getAdjCoords([], _, []).
 getAdjCoords([H|T], Limit, AllAdjCoords):- getAdjCoords(H, Limit, FirstGroup), getAdjCoords(T, Limit, Coords),
-	sort([FirstGroup|Coords], Result), flatten(Result, AllAdjCoords). 
-
+	 flatten([FirstGroup|Coords], Flat), sort(Flat, AllAdjCoords). 
 getAdjCoords((X, Y), Limit, AdjacentCoords):- 
 	 Coords = [(A, Y), (B, Y), (X, C), (X, D), (A, C), (A, D), (B, C), (B, D)],
 	  A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
@@ -84,9 +83,9 @@ getAdjEmpty(AdjEmpTiles, (X,Y), GameBoard):- length(Board, Len), getAdjCoords((X
 getAdjIfEmpty(GameBoard, Results, []).
 
 getAdjIfEmpty(GameBoard, Results, ToCheck):- 
-**/
-%openTiles(GameBoard, Display, [Hcoords|Tcoords]):-
 
+%openTiles(GameBoard, Display, [Hcoords|Tcoords]):-
+**/
 
 
 
@@ -99,7 +98,7 @@ getMines(8, 9, Answer),
 filterCoords([(1, 3), (12, 9), (4, 5)], 9, ValidCoords),
 write(ValidCoords),nl,
 write(Answer),**/
-getAdjCoords([(0,0), (5,5),(8,8)], 8, Coords),
+getAdjCoords([(0,0), (1,1)], 8, Coords),
 write(Coords).
 
 %halt(0).
