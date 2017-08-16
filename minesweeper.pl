@@ -104,6 +104,15 @@ openTile([H|T], (Xcoord, Ycoord), [H|NT]):- getElement([H|T], Ycoord, Row), getE
  itsATileCovered(Elem), itsATileEmpty(Elem), YNcoord is 8 - Ycoord, setElemAt([H|T], (Xcoord, YNcoord), 10, [H|NT]).
 
 % -------------Fim da definicao dos casos de abertura de uma casa------------------------------------------
+
+% -------------Definicao dos casos de marcacao de uma casa------------------------------------------
+flagTile([H|T], (Xcoord, Ycoord), [H|NT]):- getElement([H|T], Ycoord, Row), getElement(Row, Xcoord, Elem), 
+ itsATileCovered(Elem), itsATileBomb(Elem), YNcoord is 8 - Ycoord, setElemAt([H|T], (Xcoord, YNcoord), 21, [H|NT]).
+
+flagTile([H|T], (Xcoord, Ycoord), [H|NT]):- getElement([H|T], Ycoord, Row), getElement(Row, Xcoord, Elem), 
+ itsATileCovered(Elem), itsATileEmpty(Elem), YNcoord is 8 - Ycoord, setElemAt([H|T], (Xcoord, YNcoord), 20, [H|NT]).
+
+% -------------Fim da definicao dos casos de marcação de uma casa------------------------------------------
     
 /**----Não consegui compreender ou fazer funcionar :c----
 
@@ -139,7 +148,9 @@ fullCoveredBombsBoard(Display, Size):- length(Display, Size), length(Row, Size),
 main :- 
 fullCoveredBombsBoard(Camp, 9),
 /**setElemAt(Camp, (4, 2), 'V', Answ),**/
-openTile(Camp, (4, 2), Answ),
+openTile(Camp, (4, 2), Ans),
+printBoard(Ans), nl, nl,
+flagTile(Ans, (1, 8), Answ),
 printBoard(Answ), nl, nl,
 getMines(9, 9, Answer),
 filterCoordinates([(1, 3), (4, 5), (12, 9)], 9, ValidCoords),
