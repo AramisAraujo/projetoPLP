@@ -22,13 +22,12 @@ coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
 %Board printing
 printBoard(Board):- length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
 
-printAux(Board, Limit, Limit, Limit):- getElement(Board, Limit, Row), getElement(Row, Limit, Elem),
- write(Elem), nl.
+printAux(Board, Limit, Limit, Limit):- getElemAt(Board, (Limit, Limit), Elem), write(Elem), nl.
 
-printAux(Board, Limit, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Limit, Elem),
+printAux(Board, Limit, Ycoord, Limit):- getElemAt(Board, (Limit, Ycoord), Elem),
  write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 0, NextColumn, Limit).
 
-printAux(Board, Xcoord, Ycoord, Limit):- getElement(Board, Ycoord, Row), getElement(Row, Xcoord, Elem),
+printAux(Board, Xcoord, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem),
  write(Elem), write(' '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
 
 
@@ -37,8 +36,10 @@ getElement([H|_], 0, H).
 getElement([_|T], Pos, Element) :-  Z is Pos - 1, getElement(T, Z, Element).
 
 
-setElemAt([H|T], (0, Ycoord), Elem, [NewRow|T]):- setEleAux(H, Elem, Ycoord, NewRow).
-setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Xcoord - 1, setElemAt(T,(Z, Ycoord), Elem, NT).
+getElemAt(Board, (X,Y), Elem):- getElement(Board, Y, Row), getElement(Row, X, Elem).
+
+setElemAt([H|T], (Xcoord, 0), Elem, [NewRow|T]):- setEleAux(H, Elem, Xcoord, NewRow).
+setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Ycoord - 1, setElemAt(T,(Xcoord, Z), Elem, NT).
 
 
 setEleAux([_|T], Elem, 0, [Elem|T]).
@@ -49,55 +50,33 @@ generateMine(Limit, Coord):- random_between(0,Limit,Xm), random_between(0,Limit,
 getMines(BoardLimit, Amount, Answer):- length(Mines, Amount), 
     maplist(generateMine(BoardLimit), Mines),  sort(Mines, Answer).
 
-checkCoordinate((X, Y), Limit):- X @=< Limit, X @>= 0, Y @=< Limit, Y @>= 0.
+checkCoord((X, Y), Limit):- X @=< Limit, X @>= 0, Y @=< Limit, Y @>= 0.
 
-filterCoordinates([], Limit, []).
+filterCoords([], Limit, []).
 
-filterCoordinates([X|XS], Limit, [X|ZS]):- checkCoordinate(X, Limit),!, filterCoordinates(XS, Limit, ZS).
+filterCoords([X|XS], Limit, [X|ZS]):- checkCoord(X, Limit),!, filterCoords(XS, Limit, ZS).
 
-filterCoordinates([_|XS], Limit, ZS):- filterCoordinates(XS, Limit, ZS).
+filterCoords([_|XS], Limit, ZS):- filterCoords(XS, Limit, ZS).
 
-getAdjacentCoords((X, Y), Limit, AdjacentCoords):- 
-	 Coords = [(A, Y), (B, Y), (X, C), (X, D), (A, C), (A, D), (B, C), (B, D)], A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
-	 filterCoordinates(Coords, Limit, AdjacentCoords).
+getAdjCoords((X, Y), Limit, AdjacentCoords):- 
+	 Coords = [(A, Y), (B, Y), (X, C), (X, D), (A, C), (A, D), (B, C), (B, D)],
+	  A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
+	  filterCoords(Coords, Limit, AdjacentCoords).
 
 
 
-    
-/**----Não consegui compreender ou fazer funcionar :c----
+%getAdjEmpty(AdjEmpSpaces, (X,Y), Board):-
 
-tileHasOpen(Result) :- Result is [H|T].
-tileIsBomb(Result) :- Result is [H|T].
-tileIsEmpty(Result) :- Result is [H|T].
 
-printingTile(X, Y, Result) :- member((X, Y), tileHasOpen(A)), member((X, Y), tileIsBomb(B)), Result is bombTile(R).
-
-% Defines a empty tile, with yours bombs tips
-printingTile(X, Y, Result) :- member((X, Y), tileHasOpen(A)), member((X, Y), tileIsEmpty(B)), Result is emptyTile1(X, Y, 0).
-
-% note that emptytile? verify some position about bomb and call emptytile?+1 to verify another position
-(member((X - 1, Y - 1), tileIsBomb(A)) -> emptyTile1(X, Y, N) is emptyTile2(X, Y, S), S is N + 1 ; emptyTile1(X, Y, N) is emptyTile2(X, Y, N)). 
-(member((X, Y - 1), tileIsBomb(A)) ->     emptyTile2(X, Y, N) is emptyTile3(X, Y, S), S is N + 1 ; emptyTile2(X, Y, N) is emptyTile3(X, Y, N)).
-(member((X + 1, Y - 1), tileIsBomb(A)) -> emptyTile3(X, Y, N) is emptyTile4(X, Y, S), S is N + 1 ; emptyTile3(X, Y, N) is emptyTile4(X, Y, N)).
-(member((X - 1, Y), tileIsBomb(A)) ->     emptyTile4(X, Y, N) is emptyTile5(X, Y, S), S is N + 1 ; emptyTile4(X, Y, N) is emptyTile5(X, Y, N)).
-(member((X + 1, Y), tileIsBomb(A)) ->     emptyTile5(X, Y, N) is emptyTile6(X, Y, S), S is N + 1 ; emptyTile5(X, Y, N) is emptyTile6(X, Y, N)).
-(member((X - 1, Y + 1), tileIsBomb(A)) -> emptyTile6(X, Y, N) is emptyTile7(X, Y, S), S is N + 1 ; emptyTile6(X, Y, N) is emptyTile7(X, Y, N)).
-(member((X, Y + 1), tileIsBomb(A)) ->     emptyTile7(X, Y, N) is emptyTile8(X, Y, S), S is N + 1 ; emptyTile7(X, Y, N) is emptyTile8(X, Y, N)).
-(member((X + 1, Y + 1), tileIsBomb(A)) -> emptyTile8(X, Y, N) is emptyTile9(X, Y, S), S is N + 1 ; emptyTile8(X, Y, N) is emptyTile9(X, Y, N)).
-
-(emptyTile9(X,Y,N), N > 0 -> emptyTile9(X,Y,N) is A, string_to_atom(A, A1), atom_number(A1, N); emptyTile9(X,Y,N) is nullTile(R)).
-
-printingTile(X, Y, Result) :- Result is coverTile(R).
-
-**/
 
 
 main :- 
+
 displayBoard(Camp, 9),
 setElemAt(Camp, (4, 2), 'V', Answ),
 printBoard(Answ), nl, nl,
 getMines(9, 9, Answer),
-filterCoordinates([(1, 3), (4, 5), (12, 9)], 9, ValidCoords),
+filterCoords([(1, 3), (12, 9), (4, 5)], 9, ValidCoords),
 write(ValidCoords),nl,
 write(Answer).
 
