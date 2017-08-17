@@ -11,12 +11,14 @@ itsATileBomb(01).
 itsATileBomb(11).
 itsATileBomb(21).
 
+itsATileEmpty(0).
 itsATileEmpty(00).
 itsATileEmpty(10).
 itsATileEmpty(20).
 
 itsATileCovered(01).
 itsATileCovered(00).
+itsATileCovered(0).
 
 itsATileFlagged(20).
 itsATileFlagged(21).
@@ -42,7 +44,8 @@ printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Yc
 
 % Defines a empty tile, with yours bombs tips
 printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
- itsATileOpened(Elem), itsATileEmpty(Elem), emptyTile1(Xcoord, Ycoord, Board, 0, R), Result = R.
+ itsATileOpened(Elem), itsATileEmpty(Elem), printingEmptyTile(Xcoord, Ycoord, Board, 9, R), 
+ atom_number(R1,R), string_to_atom(R2,R1), Result = R2.
 
 printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Ycoord, Row, Elem),
  itsATileCovered(Elem), coveredTile(R), Result = R.
@@ -52,7 +55,21 @@ printingTile(Xcoord, Ycoord, Board, Result) :- nth0(Xcoord, Board, Row), nth0(Yc
 
 % ----------------- Fim da definicao da funcao que imprime os caracteres ----------------------------------
 
+% ----------------- Definicao da funcao que imprime a casa vazia ----------------------------------
+printingEmptyTile(Xcoord, Ycoord, Board, Limit, Result) :- getAdjacentCoords((Xcoord, Ycoord), Limit, AdjaCo), 
+ searchBombs(AdjaCo, Limit, Board, ValidCoords), length(ValidCoords, Length), Result is Length.
 
+searchBombs([], Limit, [C|R], []).
+
+searchBombs([X|XS], Limit, [C|R], [X|ZS]):- checkCoordinate(X, Limit),!, checkIfHasABomb(X, [C|R]), 
+ searchBombs(XS, Limit, [C|R], ZS).
+
+searchBombs([_|XS], Limit, [C|R], ZS):- searchBombs(XS, Limit, [C|R], ZS).
+
+checkIfHasABomb((Xcoord, Ycoord), [C|R]):- getElement([C|R], Ycoord, Row), getElement(Row, Xcoord, Elem), 
+ itsATileBomb(Elem). 
+
+% ----------------- Fim da definicao da funcao que imprime a casa vazia ----------------------------------
 %Board printing
 printBoard(Board):- length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
 
@@ -147,13 +164,17 @@ fullCoveredBombsBoard(Display, Size):- length(Display, Size), length(Row, Size),
 
 main :- 
 fullCoveredBombsBoard(Camp, 9),
-/**setElemAt(Camp, (4, 2), 'V', Answ),**/
+/**setElemAt(Camp, (4, 6), 00, Answ),**/
+/**write(Answ), nl, nl,**/
 openTile(Camp, (4, 2), Ans),
+/**write(Ans), nl, nl,**/
 printBoard(Ans), nl, nl,
 flagTile(Ans, (1, 8), Answ),
 printBoard(Answ), nl, nl,
+
+
 getMines(9, 9, Answer),
-filterCoordinates([(1, 3), (4, 5), (12, 9)], 9, ValidCoords),
+filterCoordinates([(1, 3), (4, 5), (2, 9), (12, 9)], 9, ValidCoords),
 write(ValidCoords),nl,
 write(Answer).
 
