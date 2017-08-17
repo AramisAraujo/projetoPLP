@@ -109,7 +109,7 @@ header(Board) :-
 
 
 getOption(Option):-
-	write("Please, type a valid option: "), read(Op),
+	write("Please, type a valid option: "), readNum(Op),
 	Op @> 0 ->
 		Option = Op;
 	Op @=< 0 ->
@@ -117,11 +117,15 @@ getOption(Option):-
 
 getCoords(Size, (X, Y)):-
 	write("Please, type your coordinates"),nl,
-	write("		Row: "), read(Xi),
-	write("		Column: "), read(Yi),
+	write("		Row: "), readNum(Xi),
+	write("		Column: "), readNum(Yi),
 	checkCoord((Xi, Yi), Size) -> X = Xi, Y = Yi;
 	write("Your coordinates are not valid! "), nl, getCoords(Size, (X, Y)).
 
+
+readNum(X):- read_line_to_codes(user_input,A2),
+	string_to_atom(A2,A1),
+	atom_number(A1,X).
 
 
 main :- 
