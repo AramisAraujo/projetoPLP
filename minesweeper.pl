@@ -20,15 +20,22 @@ coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
 
 
 %Board printing
-printBoard(Board):- length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
+printBoard(Board):- write('          	0   1   2   3   4   5   6   7   8'),nl,
+					write('          	▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼'), nl, nl,
+					length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
+
+printAux(Board, 0, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem), write('           '),write(Ycoord),write(' ▶  '),
+ write(Elem), write('   '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
+
 
 printAux(Board, Limit, Limit, Limit):- getElemAt(Board, (Limit, Limit), Elem), write(Elem), nl.
 
 printAux(Board, Limit, Ycoord, Limit):- getElemAt(Board, (Limit, Ycoord), Elem),
- write(Elem), nl, NextColumn is Ycoord + 1, printAux(Board, 0, NextColumn, Limit).
+ write(Elem), nl, nl, NextColumn is Ycoord + 1, printAux(Board, 0, NextColumn, Limit).
 
 printAux(Board, Xcoord, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem),
- write(Elem), write(' '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
+ write(Elem), write('   '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
+
 
 
 %Board Operations
@@ -94,16 +101,27 @@ getAdjIfEmpty(GBoard, Results, ToCheck):- length(GBoard, Len),
 
 
 
+
+header(Board) :- 
+	nl, nl, nl,
+	write("			## Minesweeper##"), nl, nl,
+	write("		1. Open Tile"), nl,
+	write("		2. Flag Tile"), nl,
+	write("		3. Exit Game"), nl, nl,
+	printBoard(Board), nl, nl.
+
+
+
 main :- 
 
-displayBoard(Camp, 9),
-setElemAt(Camp, (4, 2), 'V', Answ),
-printBoard(Answ), nl, nl,
-getMines(8, 9, Answer),
-filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
-write(ValidCoords),nl,
-write(Answer),
-getAdjCoords([(0,0), (1,1)], 8, Coords),
-write(Coords).
+	displayBoard(Camp, 9),
+	bombTile(X),
+	setElemAt(Camp, (4, 2), X, Answ),
+	header(Answ), nl, nl,
+	filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
+	write(ValidCoords),nl,
+	write(Answer),
+	getAdjCoords([(0,0), (1,1)], 8, Coords),
+	write(Coords).
 
-%halt(0).
+	%halt(0).
