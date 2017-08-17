@@ -134,6 +134,14 @@ applyBombs([T], GBoard, ResultBoard):- bombTileNumeric(X),length(GBoard, Len),
 applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard, Len),
     setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
     addTip(TempBoard, AdjCoords, TempBoard2), applyBombs(Tbomb, TempBoard2, ResultBoard).
+	
+	
+addTip(GBoard, [T], ResultBoard):- getElemAt(GBoard, T, X),
+    X @>= 0 -> Z is X + 1, setElemAt(GBoard, T, Z, ResultBoard). 
+addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
+    X @>= 0 -> Z is X + 1, setElemAt(GBoard, Hcoord, Z, TempBoard),
+    addTip(TempBoard, Tcoords, ResultBoard);
+    X @< 0 -> addTip(GBoard, Tcoords, ResultBoard). 
 
 
 main :- 
