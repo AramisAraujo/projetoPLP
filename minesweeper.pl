@@ -91,7 +91,6 @@ getElement([_|T], Pos, Element) :-  Z is Pos - 1, getElement(T, Z, Element).
 setElemAt([H|T], (Xcoord, 0), Elem, [NewRow|T]):- setEleAux(H, Elem, Xcoord, NewRow).
 setElemAt([H|T], (Xcoord, Ycoord), Elem, [H|NT]):- Z is Ycoord - 1, setElemAt(T,(Xcoord, Z), Elem, NT).
 
-
 setEleAux([_|T], Elem, 0, [Elem|T]).
 setEleAux([H|T], Elem, Pos, [H|NT]):- Z is Pos - 1, setEleAux(T, Elem, Z, NT).
 
