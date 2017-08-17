@@ -126,6 +126,14 @@ getCoords(Size, (X, Y)):-
 readNum(X):- read_line_to_codes(user_input,A2),
 	string_to_atom(A2,A1),
 	atom_number(A1,X).
+	
+applyBombs([T], GBoard, ResultBoard):- bombTileNumeric(X),length(GBoard, Len),
+    setElemAt(GBoard, T, X, TempBoard), getAdjCoords(T, Len, AdjCoords),
+    addTip(TempBoard, AdjCoords, ResultBoard).
+	
+applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard, Len),
+    setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
+    addTip(TempBoard, AdjCoords, TempBoard2), applyBombs(Tbomb, TempBoard2, ResultBoard).
 
 
 main :- 
