@@ -76,28 +76,33 @@ getAdjCoords((X, Y), Limit, AdjacentCoords):-
 	  A is X + 1, B is X - 1, C is Y + 1, D is Y - 1,
 	  filterCoords(Coords, Limit, AdjacentCoords).
 
-/**
-getAdjEmpty(AdjEmpTiles, (X,Y), GameBoard):- length(Board, Len), getAdjCoords((X,Y), Len, Board, Coords),
- getAdjIfEmpty(GameBoard, AdjEmpTiles, Coords).
 
-getAdjIfEmpty(GameBoard, Results, []).
+getAdjEmpty(AdjEmpTiles, (X,Y), GBoard):- length(Board, Len), getAdjCoords((X,Y), Len, Board, Coords),
+ getAdjIfEmpty(GBoard, AdjEmpTiles, Coords).
 
-getAdjIfEmpty(GameBoard, Results, ToCheck):- 
+getAdjIfEmpty(_, _, []).
 
-%openTiles(GameBoard, Display, [Hcoords|Tcoords]):-
-**/
+getAdjIfEmpty(GBoard, Results, ToCheck):- length(GBoard, Len),
+ filterEmptyTiles(ToCheck, GBoard, CheckFiltered),
+ flatten([Results|CheckFiltered], FlatResults), sort(FlatResults, NewResults),
+ getAdjCoords(ToCheck, Len, AdjUnchecked), sort(AdjUnchecked, AdjToCheck),
+ filterEmptyTiles(AdjToCheck, GBoard, Checking), subtract(Checking, NewResults, NewToCheck),
+ getAdjIfEmpty(GBoard, NewResults, NewToCheck).
+
+%openTiles(GBoard, Display, [Hcoords|Tcoords]):-
+
 
 
 
 main :- 
-/**
+
 displayBoard(Camp, 9),
 setElemAt(Camp, (4, 2), 'V', Answ),
 printBoard(Answ), nl, nl,
 getMines(8, 9, Answer),
-filterCoords([(1, 3), (12, 9), (4, 5)], 9, ValidCoords),
+filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
 write(ValidCoords),nl,
-write(Answer),**/
+write(Answer),
 getAdjCoords([(0,0), (1,1)], 8, Coords),
 write(Coords).
 
