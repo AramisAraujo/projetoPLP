@@ -115,6 +115,13 @@ getOption(Option):-
 	Op @=< 0 ->
 		write("	Your option is not valid!"),nl, getOption(Option).
 
+getCoords(Size, (X, Y)):-
+	write("Please, type your coordinates"),nl,
+	write("		Row: "), read(Xi),
+	write("		Column: "), read(Yi),
+	checkCoord((Xi, Yi), Size) -> X = Xi, Y = Yi;
+	write("Your coordinates are not valid! "), nl, getCoords(Size, (X, Y)).
+
 
 
 main :- 
@@ -124,6 +131,7 @@ main :-
 	setElemAt(Camp, (4, 2), X, Answ),
 	header(Answ), nl, nl,
 	getOption(Option),nl, nl,
+	getCoords(9, (A, B)),
 	filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
 	write(ValidCoords),nl,
 	write(Answer),
