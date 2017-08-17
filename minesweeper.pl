@@ -99,9 +99,6 @@ getAdjIfEmpty(GBoard, Results, ToCheck):- length(GBoard, Len),
 %openTiles(GBoard, Display, [Hcoords|Tcoords]):-
 
 
-
-
-
 header(Board) :- 
 	nl, nl, nl,
 	write("			## Minesweeper##"), nl, nl,
@@ -111,6 +108,14 @@ header(Board) :-
 	printBoard(Board), nl, nl.
 
 
+getOption(Option):-
+	write("Please, type a valid option: "), read(Op),
+	Op @> 0 ->
+		Option = Op;
+	Op @=< 0 ->
+		write("	Your option is not valid!"),nl, getOption(Option).
+
+
 
 main :- 
 
@@ -118,6 +123,7 @@ main :-
 	bombTile(X),
 	setElemAt(Camp, (4, 2), X, Answ),
 	header(Answ), nl, nl,
+	getOption(Option),nl, nl,
 	filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
 	write(ValidCoords),nl,
 	write(Answer),
