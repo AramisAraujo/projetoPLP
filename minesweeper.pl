@@ -171,16 +171,16 @@ header(Board, Option) :-
 
 getOption(Option):-
 	write("Please, type a valid option: "), readNum(Op),
-	Op @> 0 ->
-		Option = Op;
-		write("	Your option is not valid!"),nl, getOption(Option).
+	Op < 4 , Op > 0 ->
+		Option = Op, !;
+	write("	Invalid option , try again!"),nl, getOption(Option).
 
 getCoords(Size, (X, Y)):-
-	write("Please, type your coordinates"),nl,
+	write("Please, type Row and Column coordinates"),nl,
 	write("		Row: "), readNum(Xi),
-	write("		Column: "), readNum(Yi),
-	checkCoord((Xi, Yi), Size) -> X = Xi, Y = Yi;
-	write("Your coordinates are not valid! "), nl, getCoords(Size, (X, Y)).
+	write("		Column: "), readNum(Yi),nl,
+	checkCoord((Xi, Yi), Size) -> X = Yi, Y = Xi, !;
+	write("Typed coordinates are not valid, try again! "), nl, getCoords(Size, (X, Y)).
 
 
 readNum(X):- read_line_to_codes(user_input,A2),
@@ -193,40 +193,87 @@ createBoard(Size, GameBoard):-
 	Limit is Size - 1, getMines(Limit, Size, BombList),
 	applyBombs(BombList, GB, GameBoard).
 
+gameOver(GameBoard, Display, Points):-
+	%reveal(GameBoard, Display, AnsweredDisplay),
+	%printBoard(AnsweredDisplay),
+	write("Game Over!!"),nl,
+	write("You scored: "),write(Points),write(" Point(s)."),nl,
+	halt(0).
 
-game(GameBoard, DisplayBoard):-
-	header(DisplayBoard, Option), length(GameBoard, Size),
-	=(Option, 1) ->
+youWon(GameBoard, Display, Points):-
+	%reveal(GameBoard, Display, AnsweredDisplay),
+	%printBoard(AnsweredDisplay),
+	write("Congratulations, You Won!!"),nl,
+	write("You scored: "),write(Points),write(" Point(s)."),nl,
+	halt(0).
+
+bombAmount(BoardSize, Density, Amount):- Amount is BoardSize mod Density.
+
+
+game(GameBoard, DisplayBoard, Flags, RemTiles, Points):-
+
+	write("Remaining Flags: "),write(Flags),nl,
+	write("Tiles to open: "),write(RemTiles), nl,
+	write("Current Points: "),write(Points),nl,
+
+	RemTiles < 1 -> youWon(GameBoard, DisplayBoard, Points);
+
+	header(DisplayBoard, Option),
+	length(GameBoard, Size),
+	
+	(Option == 1 ->
 		getCoords(Size, Coord),
-		flagTile(DisplayBoard, Coord, NewDisplay),
-		game(GameBoard, NewDisplay);
-	=(Option, 2) ->
+		(getElemAt(DisplayBoard, Coord, Elem), flaggedTile(Elem) -> write("Cannot open a flagged tile."),nl,
+			game(GameBoard, DisplayBoard, Flags, RemTiles, Points);
+
+		getElemAt(GameBoard, Coord, Elem),
+		bombTileNumeric(Elem) -> 
+			gameOver(GameBoard, DisplayBoard, Points);
+
+		getElemAt(DisplayBoard, Coord, Elem),
+		coveredTile(Elem) -> getAdjEmpty(Coord, GameBoard, ToOpen),
+			getHintCoords(ToOpen, GameBoard, Hints),
+			flatten([ToOpen|Hints], Temp),
+			sort(Temp, OpenCoords),
+			openTiles(GameBoard, DisplayBoard, OpenCoords, NewDisplay),
+			length(OpenCoords, OpenedTiles), TilesLeft is RemTiles - OpenedTiles,
+			NewPontuation is Points + OpenedTiles,
+			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation));
+
+	Option == 2 -> 
 		getCoords(Size, Coord),
-		write("Not Yet"),
-		game(GameBoard, DisplayBoard);
-	=(Option, 3) ->
-		write("Game Over!!"), nl, nl, halt.
+		getElemAt(DisplayBoard, Coord, Elem),
+
+		(flaggedTile(Elem) -> coveredTile(X), 
+			setElemAt(DisplayBoard, Coord, X, NewDisplay),
+			Z is Flags + 1,
+			game(GameBoard, NewDisplay, Z, RemTiles, Points);
+
+		(Flags > 0 ->
+			(coveredTile(Elem) -> flaggedTile(X),
+			setElemAt(DisplayBoard, Coord, X, NewDisplay),
+			Z is Flags - 1,
+			game(GameBoard, NewDisplay, Z, RemTiles, Points);
+
+			write("You cannot Flag this tile!"),nl,
+			game(GameBoard, DisplayBoard, Flags, RemTiles, Points));
+
+		write("You cannot Flag any more tiles!"), nl,
+		game(GameBoard, DisplayBoard, Flags, RemTiles, Points)));
+
+	Option == 3 -> gameOver(GameBoard, DisplayBoard, Points)).
 
 
-availableTiles(BoardSize, Tiles):- AllTiles = BoardSize*BoardSize,
- 	AmountBombs = (BoardSize*BoardSize*10)/100,
- 	Tiles = AllTiles - AmountBombs.
+availableTiles(BoardSize, Tiles):- AllTiles is BoardSize*BoardSize,
+ 	AmountBombs is(BoardSize*BoardSize*10)/100,
+ 	Temp is AllTiles - AmountBombs, floor(Temp, Tiles).
 
 
-main :- 
-	gameBoard(GB, 9),
-	displayBoard(Dis,9),
-	getMines(8, 9, BombList),
-
-	applyBombs(BombList, GB, Board),
-
-
-	printBoard(Board), nl,
-	getAdjEmpty((0,0), Board, Coords), %write(Coords),nl,
-	getHintCoords(Coords, Board, Hints),
-	flatten([Coords|Hints], F),
-	sort(F, ToOpen),
-	write(Hints),nl,
-	openTiles(Board, Dis, ToOpen, Dis2),
-	printBoard(Dis2).
-	%halt(0).
+main :-
+	BoardSize is 9,
+	BombDensity is 10, 
+	createBoard(BoardSize, GameBoard),
+	displayBoard(Display, BoardSize),
+	availableTiles(BoardSize, Tiles),
+	bombAmount(BoardSize, BombDensity, Amount),
+	game(GameBoard, Display, Amount, Tiles, 0).
