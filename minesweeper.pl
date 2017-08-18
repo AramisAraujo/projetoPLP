@@ -125,7 +125,6 @@ openTiles(GBoard, Display, [Hcoords|Tcoords], NewDisplay):- getElemAt(Display, H
 	bombTileNumeric(ElemB) -> bombTile(Z), setElemAt(Display, Hcoords, Z, TempDisplay),
 	openTiles(GBoard, TempDisplay, Tcoords, NewDisplay).
 
-
 flagTile(DisplayBoard, Coord, NewDisplay):-
 	getElemAt(DisplayBoard, Coord, Elem), coveredTile(Covered),
 	Elem \= Covered -> write("You can't flag this tile!"), NewDisplay = DisplayBoard, nl;
@@ -196,12 +195,13 @@ addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
     addTip(TempBoard, Tcoords, ResultBoard);
     X @< 0 -> addTip(GBoard, Tcoords, ResultBoard). 
 
+
 createBoard(Size, GameBoard):-
 	gameBoard(GB, Size),
 	Limit is Size - 1, getMines(Limit, Size, BombList),
 	applyBombs(BombList, GB, GameBoard).
 
-/** Ainda não funciona :c
+
 
 
 game(GameBoard, DisplayBoard):-
@@ -217,9 +217,12 @@ game(GameBoard, DisplayBoard):-
 	=(Option, 3) ->
 		write("Game Over!!"), nl, nl, halt.
 
-**/
 
 
+
+
+
+availableTiles(BoardSize, Tiles):- AllTiles = BoardSize*BoardSize, AmountBombs = (BoardSize*BoardSize*10)/100, Tiles = AllTiles - AmountBombs.
 
 
 main :- 
