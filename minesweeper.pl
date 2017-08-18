@@ -125,6 +125,12 @@ openTiles(GBoard, Display, [Hcoords|Tcoords], NewDisplay):- getElemAt(Display, H
 	bombTileNumeric(ElemB) -> bombTile(Z), setElemAt(Display, Hcoords, Z, TempDisplay),
 	openTiles(GBoard, TempDisplay, Tcoords, NewDisplay).
 
+
+flagTile(DisplayBoard, Coord, NewDisplay):-
+	getElemAt(DisplayBoard, Coord, Elem), coveredTile(Covered),
+	Elem \= Covered -> write("You can't flag this tile!"), NewDisplay = DisplayBoard, nl;
+	flaggedTile(Flag), setElemAt(DisplayBoard, Coord, Flag, NewDisplay).
+
 applyBombs([T], GBoard, ResultBoard):- bombTileNumeric(X),length(GBoard, Len),
 	setElemAt(GBoard, T, X, TempBoard), getAdjCoords(T, Len, AdjCoords),
 	addTip(TempBoard, AdjCoords, ResultBoard).
