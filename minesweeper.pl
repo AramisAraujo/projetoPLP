@@ -20,9 +20,15 @@ displayBoard(Display, Size):- length(Display, Size), length(Row, Size),
 
 
 %Board Printing
-printBoard(Board):- write('          	0   1   2   3   4   5   6   7   8'),nl,
-					write('          	▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼'), nl, nl,
-					length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
+printBoard(Board):- length(Board, Length),Z is Length - 1, findall(Num, between(0, Z, Num), Nums),
+					write("                "),printIconsAux(Nums),nl,
+					length(Icons, Length), maplist(=("▼"), Icons), 
+					write("                "),printIconsAux(Icons),nl,nl,
+					printAux(Board, 0, 0, Z).
+
+printIconsAux([]).
+printIconsAux([H|T]):- write(H), write("   "), printIconsAux(T).
+					
 
 printAux(Board, 0, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem), 
 	write('           '),write(Ycoord),write(' ▶  '),
@@ -121,6 +127,12 @@ openTiles(GBoard, Display, [Hcoords|Tcoords], NewDisplay):- getElemAt(Display, H
 	openTiles(GBoard, TempDisplay, Tcoords, NewDisplay).
 
 
+flagTile(DisplayBoard, Coord, NewDisplay):-
+	getElemAt(DisplayBoard, Coord, Elem), coveredTile(Covered),
+	Elem \= Covered -> write("You can't flag this tile!"), NewDisplay = DisplayBoard, nl;
+	flaggedTile(Flag), setElemAt(DisplayBoard, Coord, Flag, NewDisplay).
+
+
 applyBombs([], Board, Board):-!. 
 applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard, Len),
 	setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
@@ -147,13 +159,14 @@ getHintCoords(Coords, GBoard, Hints):- getHintAux(Coords, GBoard, Answer),
 	flatten(Answer, Flat), sort(Flat, Temp), delete(Temp, (0,0), Hints).
 
 %User interaction
-header(Board) :- 
+header(Board, Option) :- 
 	nl, nl, nl,
 	write("			## Minesweeper##"), nl, nl,
 	write("		1. Open Tile"), nl,
 	write("		2. Flag Tile"), nl,
 	write("		3. Exit Game"), nl, nl,
-	printBoard(Board), nl, nl.
+	printBoard(Board), nl, nl,
+	getOption(Option).
 
 
 getOption(Option):-
@@ -175,10 +188,36 @@ readNum(X):- read_line_to_codes(user_input,A2),
 	atom_number(A1,X).
 	
 
+createBoard(Size, GameBoard):-
+	gameBoard(GB, Size),
+	Limit is Size - 1, getMines(Limit, Size, BombList),
+	applyBombs(BombList, GB, GameBoard).
+
+
+game(GameBoard, DisplayBoard):-
+	header(DisplayBoard, Option), length(GameBoard, Size),
+	=(Option, 1) ->
+		getCoords(Size, Coord),
+		flagTile(DisplayBoard, Coord, NewDisplay),
+		game(GameBoard, NewDisplay);
+	=(Option, 2) ->
+		getCoords(Size, Coord),
+		write("Not Yet"),
+		game(GameBoard, DisplayBoard);
+	=(Option, 3) ->
+		write("Game Over!!"), nl, nl, halt.
+
+
+availableTiles(BoardSize, Tiles):- AllTiles = BoardSize*BoardSize,
+ 	AmountBombs = (BoardSize*BoardSize*10)/100,
+ 	Tiles = AllTiles - AmountBombs.
+
+
 main :- 
 	gameBoard(GB, 9),
 	displayBoard(Dis,9),
 	getMines(8, 9, BombList),
+
 	applyBombs(BombList, GB, Board),
 
 
@@ -190,5 +229,4 @@ main :-
 	write(Hints),nl,
 	openTiles(Board, Dis, ToOpen, Dis2),
 	printBoard(Dis2).
-
 	%halt(0).
