@@ -20,9 +20,15 @@ displayBoard(Display, Size):- length(Display, Size), length(Row, Size),
 
 
 %Board Printing
-printBoard(Board):- write('          	0   1   2   3   4   5   6   7   8'),nl,
-					write('          	▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼   ▼'), nl, nl,
-					length(Board, Length),Z is Length - 1, printAux(Board, 0, 0, Z).
+printBoard(Board):- length(Board, Length),Z is Length - 1, findall(Num, between(0, Z, Num), Nums),
+					write("                "),printIconsAux(Nums),nl,
+					length(Icons, Length), maplist(=("▼"), Icons), 
+					write("                "),printIconsAux(Icons),nl,nl,
+					printAux(Board, 0, 0, Z).
+
+printIconsAux([]).
+printIconsAux([H|T]):- write(H), write("   "), printIconsAux(T).
+					
 
 printAux(Board, 0, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem), 
 	write('           '),write(Ycoord),write(' ▶  '),
