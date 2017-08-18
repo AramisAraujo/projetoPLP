@@ -65,15 +65,13 @@ checkCoord((X, Y), Limit):- X @=< Limit, X @>= 0, Y @=< Limit, Y @>= 0.
 
 
 filterCoords([], _, []).
-
 filterCoords([X|XS], Limit, [X|ZS]):- checkCoord(X, Limit),!, filterCoords(XS, Limit, ZS).
-
 filterCoords([_|XS], Limit, ZS):- filterCoords(XS, Limit, ZS).
 
 
 filterEmptyTiles([], _, _).
 filterEmptyTiles([H|T], GBoard, Answer):- getElemAt(GBoard, H, Elem), 
-	Elem =:= 0 -> Answer = [H|Ts], filterEmptyTiles(T, GBoard, Ts);
+	Elem == 0 -> Answer = [H|Ts], filterEmptyTiles(T, GBoard, Ts);
 	Answer = Ts, filterEmptyTiles(T, GBoard, Ts).
 
 
@@ -88,21 +86,24 @@ getAdjCoords((X, Y), Limit, AdjacentCoords):-
 	filterCoords(Coords, Limit, AdjacentCoords).
 
 
-getAdjEmpty((X,Y), GBoard, AdjEmpTiles):- length(GBoard, Len), getAdjCoords((X,Y), Len, Coords),
- getAdjIfEmpty(GBoard, Coords, [(X,Y)|AdjEmpTiles]).
+getAdjEmpty(Coord, GBoard, AdjEmpTiles):- length(GBoard, Len), getAdjCoords(Coord, Len, Adj),
+	filterEmptyTiles(Adj, GBoard, Empty), getAdjCoords(Empty, Len, AdjEmp),
+	getAdjIfEmpty(GBoard, [Coord|Empty], AdjEmp, AdjEmpTiles).
 
-getAdjIfEmpty(_, [], Results).
+getAdjIfEmpty(_, PartialRes, [], Answer):- flatten(PartialRes, Answer).
+getAdjIfEmpty(GBoard, PartialRes, ToCheck, Results):- 
 
-getAdjIfEmpty(GBoard, ToCheck, Results):- length(GBoard, Len),
-	filterEmptyTiles(ToCheck, GBoard, CheckFiltered),
-	flatten([Results|CheckFiltered], FlatResults), sort(FlatResults, NewResults),
+	filterEmptyTiles(ToCheck, GBoard, Empty),
+	flatten([PartialRes|Empty], Temp), sort(Temp, NewRes),
 
-	getAdjCoords(ToCheck, Len, AdjUnchecked), sort(AdjUnchecked, AdjToCheck),
-	filterEmptyTiles(AdjToCheck, GBoard, Checking), subtract(Checking, NewResults, NewToCheck),
+	length(GBoard, Len), getAdjCoords(Empty, Len, TempAdj),
+	subtract(TempAdj, NewRes, NewToCheck),
+	
 
-	getAdjIfEmpty(GBoard, NewToCheck, NewResults).
+	getAdjIfEmpty(GBoard, NewRes, NewToCheck, Results).
 
-openTiles(_,_, [],_).
+
+openTiles(_, Display, [], Display).
 openTiles(GBoard, Display, [Hcoords|Tcoords], NewDisplay):- getElemAt(Display, Hcoords, ElemD),
 	coveredTile(X), 
 	X \== ElemD -> openTiles(GBoard, Display, Tcoords, NewDisplay);
@@ -119,25 +120,31 @@ openTiles(GBoard, Display, [Hcoords|Tcoords], NewDisplay):- getElemAt(Display, H
 	bombTileNumeric(ElemB) -> bombTile(Z), setElemAt(Display, Hcoords, Z, TempDisplay),
 	openTiles(GBoard, TempDisplay, Tcoords, NewDisplay).
 
-applyBombs([T], GBoard, ResultBoard):- bombTileNumeric(X),length(GBoard, Len),
-	setElemAt(GBoard, T, X, TempBoard), getAdjCoords(T, Len, AdjCoords),
-	addTip(TempBoard, AdjCoords, ResultBoard).
 
-
+applyBombs([], Board, Board):-!. 
 applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard, Len),
 	setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
 	addTip(TempBoard, AdjCoords, TempBoard2), applyBombs(Tbomb, TempBoard2, ResultBoard).
 
-addTip(GBoard, [T], ResultBoard):- getElemAt(GBoard, T, X),
-	X @>= 0 -> Z is X + 1, setElemAt(GBoard, T, Z, ResultBoard). 
-
+addTip(Board, [], Board):-!.
 addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
 	X @>= 0 -> Z is X + 1, setElemAt(GBoard, Hcoord, Z, TempBoard),
 	addTip(TempBoard, Tcoords, ResultBoard);
-	X @< 0 -> addTip(GBoard, Tcoords, ResultBoard). 
+	addTip(GBoard, Tcoords, ResultBoard). 
 
 
-%getHintCoords
+filterHints([], _, _):-!.
+filterHints([H|T], GBoard, Answer):- getElemAt(GBoard, H, Elem), 
+	Elem > 0 -> Answer = [H|Ts], filterHints(T, GBoard, Ts);
+	Answer = Ts, filterHints(T, GBoard, Ts).
+
+
+getHintAux([], _, _):-!.
+getHintAux([H|T], GBoard, Hints):- length(GBoard, Len), getAdjCoords(H, Len, Adj),
+	filterHints(Adj, GBoard, Filtered), Hints = [Filtered|Ts], getHintCoords(T, GBoard, Ts).
+
+getHintCoords(Coords, GBoard, Hints):- getHintAux(Coords, GBoard, Answer),
+	flatten(Answer, Flat), sort(Flat, Temp), delete(Temp, (0,0), Hints).
 
 %User interaction
 header(Board) :- 
@@ -167,44 +174,21 @@ readNum(X):- read_line_to_codes(user_input,A2),
 	string_to_atom(A2,A1),
 	atom_number(A1,X).
 	
-applyBombs([T], GBoard, ResultBoard):- bombTileNumeric(X),length(GBoard, Len),
-    setElemAt(GBoard, T, X, TempBoard), getAdjCoords(T, Len, AdjCoords),
-    addTip(TempBoard, AdjCoords, ResultBoard).
-	
-applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard, Len),
-    setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
-    addTip(TempBoard, AdjCoords, TempBoard2), applyBombs(Tbomb, TempBoard2, ResultBoard).
-	
-	
-addTip(GBoard, [T], ResultBoard):- getElemAt(GBoard, T, X),
-    X @>= 0 -> Z is X + 1, setElemAt(GBoard, T, Z, ResultBoard). 
-addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
-    X @>= 0 -> Z is X + 1, setElemAt(GBoard, Hcoord, Z, TempBoard),
-    addTip(TempBoard, Tcoords, ResultBoard);
-    X @< 0 -> addTip(GBoard, Tcoords, ResultBoard). 
-
 
 main :- 
-
 	gameBoard(GB, 9),
-	printBoard(GB),nl,
+	displayBoard(Dis,9),
 	getMines(8, 9, BombList),
-	write(BombList),nl,
-	%addTip(GB, [(5,5),(6,6),(7,7)], Result),
-	applyBombs(BombList, GB, Result),
-	printBoard(Result),
-	getAdjEmpty((8,3), Coords, Result), write(Coords).
-/**
-	displayBoard(Camp, 9),
-	bombTile(X),
-	setElemAt(Camp, (4, 2), X, Answ),
-	header(Answ), nl, nl,
-	getOption(Option),nl, nl,
-	getCoords(9, (A, B)),
-	filterCoords([(1, 3), (12, 9), (4, 5)], 8, ValidCoords),
-	write(ValidCoords),nl,
-	write(Answer),
-	getAdjCoords([(0,0), (1,1)], 8, Coords),
-	write(Coords).
-**/
+	applyBombs(BombList, GB, Board),
+
+
+	printBoard(Board), nl,
+	getAdjEmpty((0,0), Board, Coords), %write(Coords),nl,
+	getHintCoords(Coords, Board, Hints),
+	flatten([Coords|Hints], F),
+	sort(F, ToOpen),
+	write(Hints),nl,
+	openTiles(Board, Dis, ToOpen, Dis2),
+	printBoard(Dis2).
+
 	%halt(0).
