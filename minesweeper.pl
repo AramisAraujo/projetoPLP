@@ -152,13 +152,14 @@ addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
 %getHintCoords
 
 %User interaction
-header(Board) :- 
+header(Board, Option) :- 
 	nl, nl, nl,
 	write("			## Minesweeper##"), nl, nl,
 	write("		1. Open Tile"), nl,
 	write("		2. Flag Tile"), nl,
 	write("		3. Exit Game"), nl, nl,
-	printBoard(Board), nl, nl.
+	printBoard(Board), nl, nl,
+	getOption(Option).
 
 
 getOption(Option):-
@@ -195,9 +196,38 @@ addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
     addTip(TempBoard, Tcoords, ResultBoard);
     X @< 0 -> addTip(GBoard, Tcoords, ResultBoard). 
 
+createBoard(Size, GameBoard):-
+	gameBoard(GB, Size),
+	Limit is Size - 1, getMines(Limit, Size, BombList),
+	applyBombs(BombList, GB, GameBoard).
+
+/** Ainda não funciona :c
+
+
+game(GameBoard, DisplayBoard):-
+	header(DisplayBoard, Option), length(GameBoard, Size),
+	=(Option, 1) ->
+		getCoords(Size, Coord),
+		flagTile(DisplayBoard, Coord, NewDisplay),
+		game(GameBoard, NewDisplay);
+	=(Option, 2) ->
+		getCoords(Size, Coord),
+		write("Not Yet"),
+		game(GameBoard, DisplayBoard);
+	=(Option, 3) ->
+		write("Game Over!!"), nl, nl, halt.
+
+**/
+
+
+
 
 main :- 
+	createBoard(9, GB),
+	displayBoard(Camp, 9),
+	game(GB, Camp).
 
+/**
 	gameBoard(GB, 9),
 	printBoard(GB),nl,
 	getMines(8, 9, BombList),
@@ -206,7 +236,7 @@ main :-
 	applyBombs(BombList, GB, Result),
 	printBoard(Result),
 	getAdjEmpty((8,3), Coords, Result), write(Coords).
-/**
+
 	displayBoard(Camp, 9),
 	bombTile(X),
 	setElemAt(Camp, (4, 2), X, Answ),
