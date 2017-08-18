@@ -1,7 +1,6 @@
 :- initialization(main).
 
 % Game Board Tiles
-
 coveredTile('■').
 bombTile('💣').
 emptyTile('□').
@@ -15,6 +14,7 @@ bombTileNumeric(-1).
 gameBoard(Board, Size):- length(Board,Size), length(Row,Size),
 	maplist( =(0), Row),  maplist( =(Row), Board).
 
+
 displayBoard(Display, Size):- length(Display, Size), length(Row, Size),
 	coveredTile(X), maplist( =(X), Row), maplist( =(Row), Display).
 
@@ -26,6 +26,7 @@ printBoard(Board):- length(Board, Length),Z is Length - 1, findall(Num, between(
 					write("                "),printIconsAux(Icons),nl,nl,
 					printAux(Board, 0, 0, Z).
 
+
 printIconsAux([]).
 printIconsAux([H|T]):- write(H), write("   "), printIconsAux(T).
 					
@@ -34,7 +35,6 @@ printAux(Board, 0, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem),
 	write('           '),write(Ycoord),write(' ▶  '),
 	write(Elem), write('   '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
 
-
 printAux(Board, Limit, Limit, Limit):- getElemAt(Board, (Limit, Limit), Elem), write(Elem), nl.
 
 printAux(Board, Limit, Ycoord, Limit):- getElemAt(Board, (Limit, Ycoord), Elem),
@@ -42,7 +42,6 @@ printAux(Board, Limit, Ycoord, Limit):- getElemAt(Board, (Limit, Ycoord), Elem),
 
 printAux(Board, Xcoord, Ycoord, Limit):- getElemAt(Board, (Xcoord, Ycoord), Elem),
 	write(Elem), write('   '), NextRow is Xcoord + 1, printAux(Board, NextRow, Ycoord, Limit).
-
 
 
 %Board Operations
@@ -138,6 +137,7 @@ applyBombs([Hbomb|Tbomb], GBoard, ResultBoard):-bombTileNumeric(X),length(GBoard
 	setElemAt(GBoard, Hbomb, X, TempBoard), getAdjCoords(Hbomb, Len, AdjCoords),
 	addTip(TempBoard, AdjCoords, TempBoard2), applyBombs(Tbomb, TempBoard2, ResultBoard).
 
+
 addTip(Board, [], Board):-!.
 addTip(GBoard, [Hcoord|Tcoords], ResultBoard):- getElemAt(GBoard, Hcoord, X),
 	X @>= 0 -> Z is X + 1, setElemAt(GBoard, Hcoord, Z, TempBoard),
@@ -165,6 +165,22 @@ createBoard(Size, GameBoard):-
 	applyBombs(BombList, GB, GameBoard).
 
 
+revealBoard(GBoard, Display, AnsweredDisplay):- length(GBoard, Len),
+	getAllCoords(Len, CoordsToOpen), openTiles(GBoard, Display, CoordsToOpen, AnsweredDisplay).
+
+
+getAllCoordsAux(Limit, (Limit,Limit), [(Limit,Limit)]).
+
+getAllCoordsAux(Limit, (X, Limit), Answer):- H = (X, Limit), Z is 0, W is X + 1,
+	Answer = [H|Ts], getAllCoordsAux(Limit, (W,Z), Ts).
+
+getAllCoordsAux(Limit, (X,Y), Answer):- H = (X,Y), Z is Y + 1,
+	Answer = [H|Ts], getAllCoordsAux(Limit, (X,Z), Ts).
+
+
+getAllCoords(BoardSize, Coords):- Limit is BoardSize - 1, getAllCoordsAux(Limit, (0,0), Coords).	
+
+
 %User interaction
 header(Board, Option) :- 
 	nl, nl, nl,
@@ -182,6 +198,7 @@ getOption(Option):-
 		Option = Op, !;
 	write("	Invalid option , try again!"),nl, getOption(Option).
 
+
 getCoords(Size, (X, Y)):-
 	write("Please, type Row and Column coordinates"),nl,
 	write("		Row: "), readNum(Xi),
@@ -196,22 +213,27 @@ readNum(X):- read_line_to_codes(user_input,A2),
 	
 
 gameOver(GameBoard, Display, Points):-
-	%reveal(GameBoard, Display, AnsweredDisplay),
-	%printBoard(AnsweredDisplay),
+	revealBoard(GameBoard, Display, AnsweredDisplay),
+	printBoard(AnsweredDisplay),
 	write("Game Over!!"),nl,
 	write("You scored: "),write(Points),write(" Point(s)."),nl,
 	halt(0).
 
+
 youWon(GameBoard, Display, Points):-
-	%reveal(GameBoard, Display, AnsweredDisplay),
-	%printBoard(AnsweredDisplay),
+	revealBoard(GameBoard, Display, AnsweredDisplay),
+	printBoard(AnsweredDisplay),
 	write("Congratulations, You Won!!"),nl,
 	write("You scored: "),write(Points),write(" Point(s)."),nl,
 	halt(0).
 
 bombAmount(BoardSize, Density, Amount):- Amount is BoardSize mod Density.
 
+availableTiles(BoardSize, Tiles):- AllTiles is BoardSize*BoardSize,
+ 	AmountBombs is(BoardSize*BoardSize*10)/100,
+ 	Temp is AllTiles - AmountBombs, floor(Temp, Tiles).
 
+%Main game 
 game(GameBoard, DisplayBoard, Flags, RemTiles, Points):-
 
 	write("Remaining Flags: "),write(Flags),nl,
@@ -245,7 +267,8 @@ game(GameBoard, DisplayBoard, Flags, RemTiles, Points):-
 		coveredTile(Elem), ElemN > 0 ->
 			openTiles(GameBoard, DisplayBoard, [Coord], NewDisplay),
 			NewPontuation is Points + 1, TilesLeft is RemTiles - 1,
-			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation)));
+			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation));
+		game(GameBoard, DisplayBoard, Flags, RemTiles, Points));
 
 	Option == 2 -> 
 		getCoords(Size, Coord),
@@ -270,10 +293,6 @@ game(GameBoard, DisplayBoard, Flags, RemTiles, Points):-
 
 	Option == 3 -> gameOver(GameBoard, DisplayBoard, Points)).
 
-
-availableTiles(BoardSize, Tiles):- AllTiles is BoardSize*BoardSize,
- 	AmountBombs is(BoardSize*BoardSize*10)/100,
- 	Temp is AllTiles - AmountBombs, floor(Temp, Tiles).
 
 
 main :-
