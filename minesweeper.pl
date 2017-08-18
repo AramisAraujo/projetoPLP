@@ -158,6 +158,13 @@ getHintAux([H|T], GBoard, Hints):- length(GBoard, Len), getAdjCoords(H, Len, Adj
 getHintCoords(Coords, GBoard, Hints):- getHintAux(Coords, GBoard, Answer),
 	flatten(Answer, Flat), sort(Flat, Temp), delete(Temp, (0,0), Hints).
 
+
+createBoard(Size, GameBoard):-
+	gameBoard(GB, Size),
+	Limit is Size - 1, getMines(Limit, Size, BombList),
+	applyBombs(BombList, GB, GameBoard).
+
+
 %User interaction
 header(Board, Option) :- 
 	nl, nl, nl,
@@ -187,11 +194,6 @@ readNum(X):- read_line_to_codes(user_input,A2),
 	string_to_atom(A2,A1),
 	atom_number(A1,X).
 	
-
-createBoard(Size, GameBoard):-
-	gameBoard(GB, Size),
-	Limit is Size - 1, getMines(Limit, Size, BombList),
-	applyBombs(BombList, GB, GameBoard).
 
 gameOver(GameBoard, Display, Points):-
 	%reveal(GameBoard, Display, AnsweredDisplay),
@@ -231,14 +233,19 @@ game(GameBoard, DisplayBoard, Flags, RemTiles, Points):-
 			gameOver(GameBoard, DisplayBoard, Points);
 
 		getElemAt(DisplayBoard, Coord, Elem),
-		coveredTile(Elem) -> getAdjEmpty(Coord, GameBoard, ToOpen),
+		getElemAt(GameBoard, Coord, ElemN),
+		(coveredTile(Elem), ElemN =:= 0 -> getAdjEmpty(Coord, GameBoard, ToOpen),
 			getHintCoords(ToOpen, GameBoard, Hints),
 			flatten([ToOpen|Hints], Temp),
 			sort(Temp, OpenCoords),
 			openTiles(GameBoard, DisplayBoard, OpenCoords, NewDisplay),
 			length(OpenCoords, OpenedTiles), TilesLeft is RemTiles - OpenedTiles,
 			NewPontuation is Points + OpenedTiles,
-			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation));
+			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation);
+		coveredTile(Elem), ElemN > 0 ->
+			openTiles(GameBoard, DisplayBoard, [Coord], NewDisplay),
+			NewPontuation is Points + 1, TilesLeft is RemTiles - 1,
+			game(GameBoard, NewDisplay, Flags, TilesLeft, NewPontuation)));
 
 	Option == 2 -> 
 		getCoords(Size, Coord),
