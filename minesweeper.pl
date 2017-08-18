@@ -271,7 +271,7 @@ availableTiles(BoardSize, Tiles):- AllTiles is BoardSize*BoardSize,
 
 main :-
 	BoardSize is 9,
-	BombDensity is 10, 
+	BombDensity is 10, %This is a percentage of bombs in the board.
 	createBoard(BoardSize, GameBoard),
 	displayBoard(Display, BoardSize),
 	availableTiles(BoardSize, Tiles),
